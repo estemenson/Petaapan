@@ -6,11 +6,11 @@ Created on 2010-08-29
 @author: jonathan
 '''
 
-REQ_STATUS = 'status'
+REQ_SUBSCRIPTION = 'subscription'
 REQ_PORT = 'port'
-PRESENCE = 'presence'
+SUBACTION = 'subscribe'
 GITHUB = 'github'
-ONLINE = 1
-OFFLINE = 0
-TEST_ONLINE = 2
-TEST_OFFLINE = 3
+SUBSCRIBE = 1
+UNSUBSCRIBE = 0
+TEST_SUBSCRIBE = 2
+TEST_UNSUBSCRIBE = 3

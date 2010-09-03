@@ -1,7 +1,8 @@
-#Thu Sep 02 17:58:34 EDT 2010
+#Fri Sep 03 16:19:56 EDT 2010
 eclipse.preferences.version=1
 encoding//src/petaapan/utilities/reportException.py=utf-8
 encoding//src/petaapan/utilities/sendJsonMsg.py=utf-8
+encoding//src/petaapan/utilities/tests/stringHandler.py=utf-8
 encoding//src/petaapan/utilities/tests/wanStatusTest.py=utf-8
 encoding//src/petaapan/utilities/wanStatus.py=utf-8
 encoding//src/petaapan/utilities/wanStatusDef.py=utf-8

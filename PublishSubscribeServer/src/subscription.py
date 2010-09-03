@@ -26,40 +26,38 @@ from petaapan.utilities import reportException
 from petaapan.utilities.wanStatusDef import *
 
 
-class AppUser(db.Expando):
+class Subscriber(db.Expando):
     first_name = db.StringProperty(indexed=False)
     middle_name = db.StringProperty(indexed=False)
     last_name = db.StringProperty(indexed=False)
     email_address = db.StringProperty(indexed=False)
     google_id = db.UserProperty(required=True, indexed=True)
     user_ip = db.StringProperty(required=True, indexed=True)
-    user_port = db.IntegerProperty(required=True)
-    
-    # 0 is offline, 1 is online
-    status = db.IntegerProperty(default=OFFLINE,
-                                choices=set([OFFLINE, ONLINE]),
+    user_port = db.IntegerProperty(required=True)    
+    status = db.IntegerProperty(default=UNSUBSCRIBE,
+                                choices=set([UNSUBSCRIBE, SUBSCRIBE]),
                                 required=True, indexed=True)
     
     
 class MainPage(webapp.RequestHandler):
-    ONLINE_LIST_KEY = 'Users'
+    ONLINE_LIST_KEY = 'Subscribers'
     
     def post(self):
         try:
             ipaddr = self.request.remote_addr
             req = json.loads(self.request.body_file.getvalue())
-            if REQ_STATUS not in req:
+            if REQ_SUBSCRIPTION not in req:
                 self.response.set_status(httplib.PRECONDITION_FAILED,
-                                 'No user or status provided in notification')
+                                 'No subscription status provided in request')
                 return
             testing = False
-            status = req[REQ_STATUS]
+            status = req[REQ_SUBSCRIPTION]
             port = req[REQ_PORT]
-            if status == TEST_ONLINE:
-                status = ONLINE
+            if status == TEST_SUBSCRIBE:
+                status = SUBSCRIBE
                 testing = True
-            elif status == TEST_OFFLINE:
-                status = OFFLINE
+            elif status == TEST_UNSUBSCRIBE:
+                status = UNSUBSCRIBE
                 testing = True
             
             # Make sure this user is registered at Google and logged on
@@ -90,7 +88,7 @@ class MainPage(webapp.RequestHandler):
             key = uid+ipaddr+str(port)
             cuser = ul[key] if key in ul else None
             if cuser is None:
-                cuser = AppUser(google_id=guser, status=status,
+                cuser = Subscriber(google_id=guser, status=status,
                                 user_ip=ipaddr, user_port=port)
                 cuser.put()
                 ul[key] = cuser
@@ -101,17 +99,17 @@ class MainPage(webapp.RequestHandler):
             
             # If user is coming online update
             # the user entity in the data store to show online status
-            if status == ONLINE:
-                if cuser.status != ONLINE:
-                    cuser.status = ONLINE
+            if status == SUBSCRIBE:
+                if cuser.status != SUBSCRIBE:
+                    cuser.status = SUBSCRIBE
                     cuser.put() 
                     cache.set(MainPage.ONLINE_LIST_KEY, ul)
                     
             # If user is going offline update                   
             # the user entity in the data store to show offline status
-            elif status == OFFLINE:
-                if cuser.status != OFFLINE:
-                    cuser.status = OFFLINE
+            elif status == UNSUBSCRIBE:
+                if cuser.status != UNSUBSCRIBE:
+                    cuser.status = UNSUBSCRIBE
                     cuser.put() 
                     cache.set(MainPage.ONLINE_LIST_KEY, ul)
             else:
@@ -121,8 +119,8 @@ class MainPage(webapp.RequestHandler):
             
             # Normal return
             self.response.set_status(httplib.ACCEPTED,
-                                     'Status set to %s' % 'online'
-                                     if status == ONLINE else 'offline' )
+                                     'Status set to %s' % 'subscribed'
+                                     if status == SUBSCRIBE else 'unsubscribed' )
             
         except Exception , ex:
             self.response.set_status(httplib.UNPROCESSABLE_ENTITY,
@@ -130,8 +128,8 @@ class MainPage(webapp.RequestHandler):
             return
             
     def load_online_users(self):
-        query = db.GqlQuery("SELECT * FROM AppUser WHERE status = :1",
-                            ONLINE)
+        query = db.GqlQuery("SELECT * FROM Subscriber WHERE status = :1",
+                            SUBSCRIBE)
         ul = {}
         for user in query:
             ul[user.google_id.user_id() + user.user_ip + str(user.user_port)] = user
@@ -139,7 +137,7 @@ class MainPage(webapp.RequestHandler):
         
 
 
-application = webapp.WSGIApplication([('/%s' % PRESENCE, MainPage)],
+application = webapp.WSGIApplication([('/%s' % SUBACTION, MainPage)],
                                      debug=False)
 
 

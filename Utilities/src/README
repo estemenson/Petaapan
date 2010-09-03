@@ -1,0 +1,13 @@
+This project contains various Python utility modules used by other projects
+developed by Petaapan.org. It is due for a substantial refactoring in the near
+future when a number of modules will move into the PublishSubscribeClient
+project (not yet started)
+
+Module Index
+reportException - gathers full information about an exception and provides a
+                  default logging capability.
+sendJsonMsg     - sends a Json message to another computer and returns the
+                  response.
+stringHandler   - provides a simple standard Python log handler based on
+                  StringIO that is intended for use in unit tests to verify
+                  that logging is happening as intended.

@@ -1,0 +1,7 @@
+This project provides the server component for a Python based distributed
+publish/subscribe mechanism. The initial implementation is setup to be hosted
+in Google App Engine but it would not be difficult to port it to a standard
+web server environment such as Apache.
+
+The client library which will provide access to the server will be implemented
+in the project PublishSubscribeClient (not yet started).
