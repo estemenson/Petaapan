@@ -1,0 +1,20 @@
+application: agile-server-app
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+- url: /presence
+  script: userpresence.py
+#  login: required
+
+- url: /github
+  script: github.py
+  
+- url: /
+  script: not_accepted.py
+# login: required
+
+- url: /.*
+  script: not_accepted.py
+# login: required

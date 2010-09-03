@@ -1,0 +1,22 @@
+The petaapan directory in the src directory is a symbolic link needed to support the Google App Engine
+development environment. It makes the modules we use from the Utilities project available to the
+GAE development server. Do not try to use it for normal access to the utility classes!
+
+Read this document for an excellent short introduction to symbolic links
+(particularly for Windows users)
+http://en.wikipedia.org/wiki/Symbolic_link
+
+When you first clone this repository you should create the symbolic link as follows:
+
+On Linux or other Unix-like systems
+
+ln -s <path-to-eclipse-workspace>/utilities/petaapan petaapan
+
+Windows instructions:
+
+On Windows 7 and Windows Vista
+Use the mklink command which is part of the standard distribution
+
+On Windows XP and Windows 2000
+See http://en.wikipedia.org/wiki/Symbolic_link for details on where to get
+appropriate utilities.
