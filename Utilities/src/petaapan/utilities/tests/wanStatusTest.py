@@ -33,42 +33,42 @@ class Test(unittest.TestCase):
 
 
     def testWanStatus(self):
-        url = 'http://localhost:8080/%s' % PRESENCE
+        url = 'http://localhost:8080/%s' % SUBACTION
         # Try to go online
-        status = TEST_ONLINE
+        status = TEST_SUBSCRIBE
         ret = petaapan.utilities.wanStatus.send(status, TEST_PORT, url)
         self.assertEquals(ret[0] , httplib.ACCEPTED)
-        self.assertTrue(string.find(ret[1], 'online') >= 0)
+        self.assertTrue(string.find(ret[1], TEST_SUBSCRIBED) >= 0)
 
         # Try to go offline
-        status = TEST_OFFLINE
+        status = TEST_UNSUBSCRIBE
         ret = petaapan.utilities.wanStatus.send(status, TEST_PORT, url)
         self.assertEquals(ret[0], httplib.ACCEPTED)
-        self.assertTrue(string.find(ret[1], 'offline') >= 0)
+        self.assertTrue(string.find(ret[1], TEST_UNSUBSCRIBED) >= 0)
         
         # Try to go online again
-        status = TEST_ONLINE
+        status = TEST_SUBSCRIBE
         ret = petaapan.utilities.wanStatus.send(status, TEST_PORT, url)
         self.assertEquals(ret[0] , httplib.ACCEPTED)
-        self.assertTrue(string.find(ret[1], 'online') >= 0)
+        self.assertTrue(string.find(ret[1], TEST_SUBSCRIBED) >= 0)
         
         # Say we are coming online when we are already
-        status = TEST_ONLINE
+        status = TEST_SUBSCRIBE
         ret = petaapan.utilities.wanStatus.send(status, TEST_PORT, url)
         self.assertEquals(ret[0] , httplib.ACCEPTED)
-        self.assertTrue(string.find(ret[1], 'online') >= 0)
+        self.assertTrue(string.find(ret[1], TEST_SUBSCRIBED) >= 0)
 
         # Now to go offline
-        status = TEST_OFFLINE
+        status = TEST_UNSUBSCRIBE
         ret = petaapan.utilities.wanStatus.send(status, TEST_PORT, url)
         self.assertEquals(ret[0], httplib.ACCEPTED)
-        self.assertTrue(string.find(ret[1], 'offline') >= 0)
+        self.assertTrue(string.find(ret[1], TEST_UNSUBSCRIBED) >= 0)
 
         # And do it again
-        status = TEST_OFFLINE
+        status = TEST_UNSUBSCRIBE
         ret = petaapan.utilities.wanStatus.send(status, TEST_PORT, url)
         self.assertEquals(ret[0], httplib.ACCEPTED)
-        self.assertTrue(string.find(ret[1], 'offline') >= 0)
+        self.assertTrue(string.find(ret[1], TEST_UNSUBSCRIBED) >= 0)
         
 
 if __name__ == "__main__":

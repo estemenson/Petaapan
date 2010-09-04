@@ -17,6 +17,12 @@ Windows instructions:
 On Windows 7 and Windows Vista
 Use the mklink command which is part of the standard distribution
 
+You need to create a directory junction, so assuming you are in
+${workspace_loc}\PublishSubscribeServer\src
+use the following command invocation
+
+mklink petaapan ..\..\utilities\src\petaapan /J
+
 On Windows XP and Windows 2000
 See http://en.wikipedia.org/wiki/Symbolic_link for details on where to get
 appropriate utilities.

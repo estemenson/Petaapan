@@ -119,8 +119,9 @@ class MainPage(webapp.RequestHandler):
             
             # Normal return
             self.response.set_status(httplib.ACCEPTED,
-                                     'Status set to %s' % 'subscribed'
-                                     if status == SUBSCRIBE else 'unsubscribed' )
+                                     'Status set to %s' % TEST_SUBSCRIBED
+                                     if status == SUBSCRIBE
+                                     else TEST_UNSUBSCRIBED )
             
         except Exception , ex:
             self.response.set_status(httplib.UNPROCESSABLE_ENTITY,

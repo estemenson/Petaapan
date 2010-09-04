@@ -17,9 +17,10 @@ import petaapan.utilities.sendJsonMsg
 from petaapan.utilities.wanStatusDef import *
 
 def send(status, port, url, dest_host='localhost', dest_port=8080):
-    if status not in (ONLINE, TEST_ONLINE, TEST_OFFLINE, OFFLINE ):
+    if status not in (SUBSCRIBE, TEST_SUBSCRIBE,
+                      TEST_UNSUBSCRIBE, UNSUBSCRIBE ):
         raise ValueError, 'Invalid application online status'
-    ret = petaapan.utilities.sendJsonMsg.send({REQ_STATUS: status,
+    ret = petaapan.utilities.sendJsonMsg.send({REQ_SUBSCRIPTION: status,
                                                REQ_PORT: port},
                                               url)
     return ret    
