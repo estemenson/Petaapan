@@ -15,8 +15,8 @@ import unittest
 import httplib
 import string
 
-import petaapan.utilities.wanStatus
-from petaapan.utilities.wanStatusDef import *
+from pssDef import *
+from petaapan.utilities import sendJsonMsg
 
 TEST_PORT = 16160
 
@@ -32,45 +32,48 @@ class Test(unittest.TestCase):
         pass
 
 
-    def testWanStatus(self):
+    def testSubscription(self):
         url = 'http://localhost:8080/%s' % SUBACTION
-        # Try to go online
-        status = TEST_SUBSCRIBE
-        ret = petaapan.utilities.wanStatus.send(status, TEST_PORT, url)
+        # Try to subscribe
+        status = {REQ_SUBSCRIPTION: TEST_SUBSCRIBE,
+                  REQ_PUBLISHER: GITHUB,
+                  REQ_PORT: TEST_PORT}
+                  
+        ret = sendJsonMsg.send(status, url, dest_port=TEST_PORT)
         self.assertEquals(ret[0] , httplib.ACCEPTED)
         self.assertTrue(string.find(ret[1], TEST_SUBSCRIBED) >= 0)
 
-        # Try to go offline
-        status = TEST_UNSUBSCRIBE
-        ret = petaapan.utilities.wanStatus.send(status, TEST_PORT, url)
+        # Try to unsubscribe
+        status[REQ_SUBSCRIPTION] = TEST_UNSUBSCRIBE
+        ret = sendJsonMsg.send(status, url)
         self.assertEquals(ret[0], httplib.ACCEPTED)
         self.assertTrue(string.find(ret[1], TEST_UNSUBSCRIBED) >= 0)
         
-        # Try to go online again
-        status = TEST_SUBSCRIBE
-        ret = petaapan.utilities.wanStatus.send(status, TEST_PORT, url)
+        # Try to subscribe again
+        status[REQ_SUBSCRIPTION] = TEST_SUBSCRIBE
+        ret = sendJsonMsg.send(status, url)
         self.assertEquals(ret[0] , httplib.ACCEPTED)
         self.assertTrue(string.find(ret[1], TEST_SUBSCRIBED) >= 0)
         
-        # Say we are coming online when we are already
-        status = TEST_SUBSCRIBE
-        ret = petaapan.utilities.wanStatus.send(status, TEST_PORT, url)
+        # Say we are subscribing when we are already
+        status[REQ_SUBSCRIPTION] = TEST_SUBSCRIBE
+        ret = sendJsonMsg.send(status, url)
         self.assertEquals(ret[0] , httplib.ACCEPTED)
         self.assertTrue(string.find(ret[1], TEST_SUBSCRIBED) >= 0)
 
-        # Now to go offline
-        status = TEST_UNSUBSCRIBE
-        ret = petaapan.utilities.wanStatus.send(status, TEST_PORT, url)
+        # Now to go unsubscribe
+        status[REQ_SUBSCRIPTION] = TEST_UNSUBSCRIBE
+        ret = sendJsonMsg.send(status, url)
         self.assertEquals(ret[0], httplib.ACCEPTED)
         self.assertTrue(string.find(ret[1], TEST_UNSUBSCRIBED) >= 0)
 
         # And do it again
-        status = TEST_UNSUBSCRIBE
-        ret = petaapan.utilities.wanStatus.send(status, TEST_PORT, url)
+        status[REQ_SUBSCRIPTION] = TEST_UNSUBSCRIBE
+        ret = sendJsonMsg.send(status, url)
         self.assertEquals(ret[0], httplib.ACCEPTED)
         self.assertTrue(string.find(ret[1], TEST_UNSUBSCRIBED) >= 0)
         
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testWanStatus']
+    #import sys;sys.argv = ['', 'Test.testSubscription']
     unittest.main()

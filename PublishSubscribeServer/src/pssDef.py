@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-Common definitions used in the Userapp Wan status notification protocol
+Common definitions used in the PublishSubscribeServer GAC application
 Created on 2010-08-29
 
 @author: jonathan
@@ -8,6 +8,7 @@ Created on 2010-08-29
 
 REQ_SUBSCRIPTION = 'subscription'
 REQ_PORT = 'port'
+REQ_PUBLISHER = 'publisher'
 SUBACTION = 'subscribe'
 GITHUB = 'github'
 SUBSCRIBE = 1

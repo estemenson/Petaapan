@@ -23,7 +23,7 @@ import httplib
 import string
 
 from petaapan.utilities import reportException
-from petaapan.utilities.wanStatusDef import *
+from pssDef import *
 
 
 class Subscriber(db.Expando):
@@ -37,21 +37,22 @@ class Subscriber(db.Expando):
     status = db.IntegerProperty(default=UNSUBSCRIBE,
                                 choices=set([UNSUBSCRIBE, SUBSCRIBE]),
                                 required=True, indexed=True)
+    publisher = db.StringProperty(required=True, indexed=True)
     
     
 class MainPage(webapp.RequestHandler):
-    ONLINE_LIST_KEY = 'Subscribers'
     
     def post(self):
         try:
             ipaddr = self.request.remote_addr
             req = json.loads(self.request.body_file.getvalue())
-            if REQ_SUBSCRIPTION not in req:
+            if REQ_SUBSCRIPTION not in req or REQ_PUBLISHER not in req:
                 self.response.set_status(httplib.PRECONDITION_FAILED,
-                                 'No subscription status provided in request')
+                'No or incomplete subscription status provided in request')
                 return
             testing = False
             status = req[REQ_SUBSCRIPTION]
+            publisher = req[REQ_PUBLISHER]
             port = req[REQ_PORT]
             if status == TEST_SUBSCRIBE:
                 status = SUBSCRIBE
@@ -75,9 +76,9 @@ class MainPage(webapp.RequestHandler):
             # load it from the data store
             
             cache = memcache.Client()
-            ul = cache.get(MainPage.ONLINE_LIST_KEY)
+            ul = cache.get(publisher)
             if ul is None:
-                ul = self.load_online_users()
+                ul = self.load_online_subscribers(publisher)
                 
             
             # See if user in cache
@@ -89,10 +90,11 @@ class MainPage(webapp.RequestHandler):
             cuser = ul[key] if key in ul else None
             if cuser is None:
                 cuser = Subscriber(google_id=guser, status=status,
-                                user_ip=ipaddr, user_port=port)
+                                   user_ip=ipaddr, user_port=port,
+                                   publisher=publisher)
                 cuser.put()
                 ul[key] = cuser
-                cache.set(MainPage.ONLINE_LIST_KEY, ul)
+                cache.set(publisher, ul)
             
             # If user is coming online but is already recorded as online
             # simply set error code and return
@@ -103,7 +105,7 @@ class MainPage(webapp.RequestHandler):
                 if cuser.status != SUBSCRIBE:
                     cuser.status = SUBSCRIBE
                     cuser.put() 
-                    cache.set(MainPage.ONLINE_LIST_KEY, ul)
+                    cache.set(publisher, ul)
                     
             # If user is going offline update                   
             # the user entity in the data store to show offline status
@@ -111,7 +113,7 @@ class MainPage(webapp.RequestHandler):
                 if cuser.status != UNSUBSCRIBE:
                     cuser.status = UNSUBSCRIBE
                     cuser.put() 
-                    cache.set(MainPage.ONLINE_LIST_KEY, ul)
+                    cache.set(publisher, ul)
             else:
                 self.response.set_status(httplib.NOT_ACCEPTABLE,
                                          'Urecognized status notification')
@@ -128,12 +130,14 @@ class MainPage(webapp.RequestHandler):
                                      reportException.report(ex))
             return
             
-    def load_online_users(self):
-        query = db.GqlQuery("SELECT * FROM Subscriber WHERE status = :1",
-                            SUBSCRIBE)
+    def load_online_subscribers(self, publisher):
+        query = db.GqlQuery(
+            "SELECT * FROM Subscriber WHERE status = :1 AND publisher = :2",
+                            SUBSCRIBE, publisher)
         ul = {}
         for user in query:
-            ul[user.google_id.user_id() + user.user_ip + str(user.user_port)] = user
+            ul[user.google_id.user_id() + user.user_ip + str(user.user_port)]\
+                = user
         return ul
         
 
