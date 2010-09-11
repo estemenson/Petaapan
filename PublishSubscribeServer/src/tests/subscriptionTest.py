@@ -36,10 +36,10 @@ class Test(unittest.TestCase):
         url = 'http://localhost:8080/%s' % SUBACTION
         # Try to subscribe
         status = {REQ_SUBSCRIPTION: TEST_SUBSCRIBE,
-                  REQ_PUBLISHER: GITHUB,
+                  REQ_PUBLISHER: GITHUB + '/jfgossage/Storyapp',
                   REQ_PORT: TEST_PORT}
                   
-        ret = sendJsonMsg.send(status, url, dest_port=TEST_PORT)
+        ret = sendJsonMsg.send(status, url)
         self.assertEquals(ret[0] , httplib.ACCEPTED)
         self.assertTrue(string.find(ret[1], TEST_SUBSCRIBED) >= 0)
 

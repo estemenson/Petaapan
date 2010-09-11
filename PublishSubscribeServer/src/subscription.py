@@ -13,8 +13,6 @@ from __future__ import absolute_import
 from __future__ import with_statement
 
 from google.appengine.ext import webapp
-from google.appengine.ext import db
-from google.appengine.api import memcache
 from google.appengine.api import users
 from google.appengine.ext.webapp.util import run_wsgi_app
 
@@ -24,23 +22,15 @@ import string
 
 from petaapan.utilities import reportException
 from pssDef import *
+from database import Subscriber, load_online_subscribers
+from cache import GacCache
 
-
-class Subscriber(db.Expando):
-    first_name = db.StringProperty(indexed=False)
-    middle_name = db.StringProperty(indexed=False)
-    last_name = db.StringProperty(indexed=False)
-    email_address = db.StringProperty(indexed=False)
-    google_id = db.UserProperty(required=True, indexed=True)
-    user_ip = db.StringProperty(required=True, indexed=True)
-    user_port = db.IntegerProperty(required=True)    
-    status = db.IntegerProperty(default=UNSUBSCRIBE,
-                                choices=set([UNSUBSCRIBE, SUBSCRIBE]),
-                                required=True, indexed=True)
-    publisher = db.StringProperty(required=True, indexed=True)
     
     
 class MainPage(webapp.RequestHandler):
+    
+    def __init__(self):
+        self.cache = GacCache()
     
     def post(self):
         try:
@@ -75,10 +65,7 @@ class MainPage(webapp.RequestHandler):
             # Get online user list from memcache if it is there, otherwise
             # load it from the data store
             
-            cache = memcache.Client()
-            ul = cache.get(publisher)
-            if ul is None:
-                ul = self.load_online_subscribers(publisher)
+            ul = self.cache.load_cache(publisher, load_online_subscribers)
                 
             
             # See if user in cache
@@ -92,28 +79,21 @@ class MainPage(webapp.RequestHandler):
                 cuser = Subscriber(google_id=guser, status=status,
                                    user_ip=ipaddr, user_port=port,
                                    publisher=publisher)
-                cuser.put()
-                ul[key] = cuser
-                cache.set(publisher, ul)
-            
-            # If user is coming online but is already recorded as online
-            # simply set error code and return
+                self.cache.update(publisher, key, cuser)
             
             # If user is coming online update
             # the user entity in the data store to show online status
             if status == SUBSCRIBE:
                 if cuser.status != SUBSCRIBE:
                     cuser.status = SUBSCRIBE
-                    cuser.put() 
-                    cache.set(publisher, ul)
+                    self.cache.update(publisher, key, cuser)
                     
             # If user is going offline update                   
             # the user entity in the data store to show offline status
             elif status == UNSUBSCRIBE:
                 if cuser.status != UNSUBSCRIBE:
                     cuser.status = UNSUBSCRIBE
-                    cuser.put() 
-                    cache.set(publisher, ul)
+                    self.cache.update(publisher, key, cuser)
             else:
                 self.response.set_status(httplib.NOT_ACCEPTABLE,
                                          'Urecognized status notification')
@@ -130,15 +110,6 @@ class MainPage(webapp.RequestHandler):
                                      reportException.report(ex))
             return
             
-    def load_online_subscribers(self, publisher):
-        query = db.GqlQuery(
-            "SELECT * FROM Subscriber WHERE status = :1 AND publisher = :2",
-                            SUBSCRIBE, publisher)
-        ul = {}
-        for user in query:
-            ul[user.google_id.user_id() + user.user_ip + str(user.user_port)]\
-                = user
-        return ul
         
 
 
