@@ -15,6 +15,7 @@ from __future__ import with_statement
 
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
+from google.appengine.api.labs import taskqueue
 
 import json
 import httplib

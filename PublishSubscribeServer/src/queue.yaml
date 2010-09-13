@@ -1,0 +1,5 @@
+queue:
+- name: default
+  rate: 5/s
+- name: github
+  rate: 5/s
