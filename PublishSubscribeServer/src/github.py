@@ -21,6 +21,7 @@ import httplib
 import string
 
 from petaapan.utilities import reportException
+from pssDef import *
 
 GITHUB_ID = 'payload'
 
@@ -42,13 +43,14 @@ class MainPage(webapp.RequestHandler):
                 # and it would be a good idea to give the disrupter as
                 # little information as possible
                 self.response.set_status(httplib.OK)
+            return
         except Exception , ex:
             self.response.set_status(httplib.UNPROCESSABLE_ENTITY,
                                      reportException.report(ex))
             return
 
 
-application = webapp.WSGIApplication([('/github', MainPage)], debug=False)
+application = webapp.WSGIApplication([('/%s' % GITHUB, MainPage)], debug=False)
 
 
 def main():
