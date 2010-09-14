@@ -11,7 +11,6 @@ REQ_PORT = 'port'
 REQ_PUBLISHER = 'publisher'
 SUBACTION = 'subscribe'
 SUBSCRIBER = 'subscriber'
-GITHUB = 'github'
 CONTENT_TYPE = 'Content-Type'
 SUBSCRIBE = 1
 UNSUBSCRIBE = 0
