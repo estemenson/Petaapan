@@ -14,6 +14,7 @@ from __future__ import unicode_literals
 
 import unittest
 import petaapan.utilities.sendJsonMsg
+from pssDef import *
 
 class GithubTest(unittest.TestCase):
        
@@ -69,9 +70,10 @@ class GithubTest(unittest.TestCase):
                        'ref': 'refs/head/master'
                       }
                    }
-        ret = petaapan.utilities.sendJsonMsg.send(self.pushobj,
-                          'http://localhost:8080/%s' % self.google_app_name,
-                                                  debug_level=3,
-                                                  ensure_ascii=False)
+        url =  'http://archimedes.petaapan.org:16159/%s' % GITHUB
+        host = 'archimedes.petaapan.org'
+        ret = petaapan.utilities.sendJsonMsg.send(self.pushobj, url,
+                                                  dest_host=host,
+                                                  dest_port=16159)
         print('github test return code: %s  reason: %s',
               ret.status, ret.reason)

@@ -22,6 +22,10 @@ class MainPage(webapp.RequestHandler):
     def get(self):
         self.response.headers['Content-Type'] = 'text/plain'
         self.response.set_status(httplib.FORBIDDEN)
+        
+    def post(self):
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.set_status(httplib.FORBIDDEN)
 
 
 application = webapp.WSGIApplication([('/', MainPage), ('/.*', MainPage)], debug=True)

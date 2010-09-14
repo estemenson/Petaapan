@@ -14,8 +14,14 @@ from __future__ import absolute_import
 from __future__ import with_statement
 
 from google.appengine.ext import db
+from google.appengine.api.labs import taskqueue
 from pssDef import *
+from githubDef import *
 
+import json
+
+subscribers_to_pub\
+    = "SELECT * FROM Subscriber WHERE status = :1 AND publisher = :2"
 
 class Subscriber(db.Expando):
     first_name = db.StringProperty(indexed=False)
@@ -32,11 +38,19 @@ class Subscriber(db.Expando):
     
     
 def load_online_subscribers(publisher):
-    query = db.GqlQuery(
-        "SELECT * FROM Subscriber WHERE status = :1 AND publisher = :2",
-                        SUBSCRIBE, publisher)
+    query = db.GqlQuery(subscribers_to_pub, SUBSCRIBE, publisher)
     ul = {}
     for subscriber in query:
         ul[subscriber.google_id.user_id() + subscriber.user_ip + str(subscriber.user_port)]\
             = subscriber
     return ul
+
+
+def queue_pub_notifications(publisher, content_type, payload):
+    query = db.GqlQuery(subscribers_to_pub, SUBSCRIBE, publisher)
+    for subscriber in query:
+        taskqueue.add(url=GITHUB_TASK_URL,
+                      params=json.dumps({SUBSCRIBER: '%s:%s' % (subscriber.user_ip,
+                                                                subscriber.user_port),
+                                         CONTENT_TYPE: content_type,
+                                         GITHUB_ID : payload[GITHUB_ID]}))

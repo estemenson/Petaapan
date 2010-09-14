@@ -6,15 +6,16 @@ api_version: 1
 handlers:
 - url: /subscribe
   script: subscription.py
-#  login: required
 
 - url: /github
   script: github.py
   
+- url: /tasks/github
+  script: github_task.py
+  
 - url: /
   script: not_accepted.py
-# login: required
 
 - url: /.*
   script: not_accepted.py
-# login: required
+

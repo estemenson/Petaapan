@@ -15,7 +15,6 @@ from __future__ import with_statement
 
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
-from google.appengine.api.labs import taskqueue
 
 import json
 import httplib
@@ -23,8 +22,10 @@ import string
 
 from petaapan.utilities import reportException
 from pssDef import *
+from githubDef import *
+from database import queue_pub_notifications
 
-GITHUB_ID = 'payload'
+
 
 class MainPage(webapp.RequestHandler):
     
@@ -38,6 +39,10 @@ class MainPage(webapp.RequestHandler):
                 repo = publication['repository']
                 url = repo['url']
                 publisher = string.split(url, 'http://github.com/')[1]
+                content_type = self.request.headers[CONTENT_TYPE]
+                queue_pub_notifications(publisher,
+                                        content_type,
+                                        self.request.body_file.getvalue())
             else:
                 # If we don't recognise the payload, send an accepted
                 # status anyway as this is likely from someone disruptive
