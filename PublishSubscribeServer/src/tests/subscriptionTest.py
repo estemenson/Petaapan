@@ -16,6 +16,7 @@ import httplib
 import string
 
 from pssDef import *
+from githubDef import *
 from petaapan.utilities import sendJsonMsg
 
 TEST_PORT = 16160
