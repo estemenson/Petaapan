@@ -14,28 +14,31 @@ import os
 class EnvironmentPath(object):
     '''
     This class provides methods to manage the PATH environment variable
-    provided by the Windows and Unix like operating systems. The PATH variable
-    is maintained by the operating system as an OS specific delimiter separated
-    list of strings representing paths to locations in the operating system that
-    are to be searched for executable programs or scripts to be run. Paths may have
-    other environment variables embedded within them which will need to be evaluated,
-    possibly recursively, before the path strings become usable.
+    provided by the Windows and Unix like operating systems. The PATH
+    variable is maintained by the operating system as an OS specific delimiter
+    separated list of strings representing paths to locations in the operating
+    system that are to be searched for executable programs or scripts to be
+    run. Paths may have other environment variables embedded within them which
+    will need to be evaluated, possibly recursively, before the path strings
+    become usable.
     
     This class provides the following capabilities:
-    1. Iterate over the list of paths contained in the PATH environment variable.
-    2. Determine if a given executable or script can be found via the PATH environment
+    1. Iterate over the list of paths contained in the PATH environment
        variable.
-    3. Determine whether the caller is authorised to execute a program or script.
+    2. Determine if a given executable or script can be found via the PATH
+       environment
+       variable.
+    3. Determine whether the caller is authorised to execute a program or
+       script.
     '''
 
 
-    def __init__(self, environment = os.environ, pathsep = os.path.pathsep, dirsep = os.path.sep):
-        '''
-        Constructor
-        '''
+    def __init__(self, environment = os.environ, pathsep = os.path.pathsep,
+                 dirsep = os.path.sep):
         # Build the path table
         self.pathTable = []
-        parstr = environment['PATH'].partition(pathsep)
+        path = environment['Path'] + pathsep + environment['PATH']
+        parstr = environment['Path'].partition(pathsep)
         while parstr[0] != '':
             # Sanitise the path
             self.pathTable.append(parstr[0].strip().rstrip(dirsep))
