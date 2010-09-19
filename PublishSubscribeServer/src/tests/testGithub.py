@@ -15,6 +15,7 @@ from __future__ import unicode_literals
 import unittest
 import petaapan.utilities.sendJsonMsg
 from pssDef import *
+from githubDef import *
 
 class GithubTest(unittest.TestCase):
        
