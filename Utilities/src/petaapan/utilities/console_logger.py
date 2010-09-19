@@ -23,9 +23,6 @@ class ConsoleLogger(object):
 
 
     def __init__(self, name, level=logging.ERROR):
-        '''
-        Constructor
-        '''
         self._log = None
         self._enabled = False
         try:
@@ -65,6 +62,10 @@ class ConsoleLogger(object):
             self._log.getEffectiveLevel()
             
     level = property(getLevel, setLevel)
+    
+    @property
+    def logger(self):
+        return self._log
         
         
         
