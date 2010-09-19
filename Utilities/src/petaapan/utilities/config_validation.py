@@ -27,14 +27,19 @@ def ValidateUrl(url):
         c = urlopen(url)
         return (result, errmsg)
     except URLError, ex:
-        result = logging.ERROR
-        errmsg.append(\
-        "%s is an invalid, non-existent or currently inaccessible URL" % (url))
-        errmsg.append(unicode(ex))
-        return (result, errmsg)
+        return BadUrl(ex, url)        
+    except ValueError, ex:
+        return BadUrl(ex, url)
     finally:
         if c is not None: c.close()
 
+
+def BadUrl(ex, url):
+        errmsg = []
+        errmsg.append(\
+        "%s is an invalid, non-existent or currently inaccessible URL" % (url))
+        errmsg.append(unicode(ex))
+        return (logging.ERROR, errmsg)
 
 def ValidateExistingDirectory(path):
         result = logging.NOTSET
