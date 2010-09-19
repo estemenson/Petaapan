@@ -2,6 +2,7 @@
 '''
 
 Send newly published content to a subscriber
+Currently runs in a GAE task queue
 Compatible with Python 2.5 or later
 
 Created on 2010-09-13
