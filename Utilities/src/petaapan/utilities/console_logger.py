@@ -52,10 +52,37 @@ class ConsoleLogger(object):
             self._handler.setFormatter(self._formatter)
             self._log.addHandler(self._handler)
             self._enabled = True
-            
+    def debug(self, msg):
+        if self._log and self._enabled:
+            self._log.debug(msg)
+    def error(self, msg):
+        if self._log and self._enabled:
+            self._log.error(msg)
+    def critical(self, msg):
+        if self._log and self._enabled:
+            self._log.critical(msg)
+    def warning(self, msg):
+        if self._log and self._enabled:
+            self._log.warning(msg)
+    def info(self, msg):
+        if self._log and self._enabled:
+            self._log.info(msg)
+        
     def setLevel(self, level):
         if self._log:
-            self._log.setLevel(level)
+            if level == 'error':
+                _level = logging.ERROR
+            elif level == 'critical':
+                _level = logging.CRITICAL
+            elif level == 'warning':
+                _level = logging.WARNING
+            elif level == 'debug':
+                _level = logging.DEBUG
+            elif level == 'info':
+                _level = logging.INFO
+            else:
+                _level = level
+            self._log.setLevel(_level)
             
     def getLevel(self):
         if self._log:
