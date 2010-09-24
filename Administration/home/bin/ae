@@ -1,3 +1,0 @@
-#!/bin/bash
-# Invoke Eclipse with the Agile workspace
-python ~/bin/loadEclipse.py Agile

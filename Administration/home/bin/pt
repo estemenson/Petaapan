@@ -1,3 +1,0 @@
-#!/bin/bash
-# Invoke Eclipse with the Petaapan workspace
-python ~/bin/loadEclipse.py Petaapan
