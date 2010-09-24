@@ -23,7 +23,10 @@ import BaseHTTPServer
 
 class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
     def do_POST(self):
-        pass
+        msg = json.load(self.rfile)
+        self.send_response(httplib.OK)
+        for o in self._observers:
+            o.notify(msg)
     
 
 class ServerManager(object):
@@ -33,3 +36,24 @@ class ServerManager(object):
         self._port = port
         self._server = server_class((host, port), handler_class)
         self._shutdown = False
+        self._observers = []
+    
+    def run(self): 
+        while not self._shutdown:
+            self._server.handle_request()       
+        for o in self._observers:
+            self._observers.remove(o)
+        self._observers = None
+        self._server = None
+        
+    def addObserver(self, observer):
+        self._observer.append(observer)
+    def removeObserver(self, observer):
+        self._observers.remove(observer)
+
+    def getShutdown(self):
+        return self._shutdown
+    def setShutdown(self, value):
+        self._shutdown = value
+    shutdown = property(getShutdown, setShutdown)
+        
