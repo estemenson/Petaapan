@@ -55,12 +55,11 @@ class MainPage(webapp.RequestHandler):
             # Make sure this user is registered at Google and logged on
             guser = users.get_current_user()
             if not guser:
-                if not testing:
-                    self.response.set_status(httplib.PRECONDITION_FAILED,
-         'You are not logged on to Google via your Google account or OpenId')
-                    return
-                else:                   
-                    guser = users.User(email='jgossage@gmail.com')
+                guser = users.User(email=req[USER_ID])
+                if guser.user_id() == None:
+                    self.response.set_status(httplib.NOT_ACCEPTABLE,
+                             'Urecognized Google user')
+                        
                 
             
             # Get online user list from memcache if it is there, otherwise

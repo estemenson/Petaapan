@@ -1,4 +1,4 @@
-application: agile-server-app
+application: agimanserver
 version: 1
 runtime: python
 api_version: 1
@@ -6,6 +6,7 @@ api_version: 1
 handlers:
 - url: /subscribe
   script: subscription.py
+#  login: required
 
 - url: /github
   script: github.py
@@ -14,9 +15,16 @@ handlers:
   script: github_task.py
   login: admin
   
+- url: /admin/.*
+  script: $PYTHON_LIB/google/appengine/ext/admin
+  login: admin
+  
 - url: /
   script: not_accepted.py
 
 - url: /.*
   script: not_accepted.py
+  
+derived_file_type:
+- python_precompiled
 

@@ -25,7 +25,7 @@ def send(msg, url, dest_host='localhost', dest_port=8080):
             conn.request('POST', url, urllib.quote_plus(json.dumps(msg),
                                                         str('/')))
             ret = conn.getresponse()
-            return (ret.status, ret.reason)
+            return (ret.status, ret.reason, ret.getheaders())
     finally:
         if conn is not None: conn.close()
         

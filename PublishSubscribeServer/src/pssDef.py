@@ -11,6 +11,7 @@ REQ_PORT = 'port'
 REQ_PUBLISHER = 'publisher'
 SUBACTION = 'subscribe'
 SUBSCRIBER = 'subscriber'
+USER_ID = 'userid'
 CONTENT_TYPE = 'Content-Type'
 SUBSCRIBE = 1
 UNSUBSCRIBE = 0
