@@ -1,0 +1,6 @@
+#! /bin/bash
+#
+# Script to load the Agile workspace into Eclipse
+
+/d/Users/jonathan/Downloads/Eclipse/eclipse-rcp-helios-win32/eclipse/eclipse.exe\
+    -data /d/Users/jonathan/EclipseWorkspaces/Repositories/Agile &

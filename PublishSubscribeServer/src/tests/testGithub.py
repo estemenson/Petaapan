@@ -13,6 +13,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import unittest
+import httplib
 import petaapan.utilities.sendJsonMsg
 from pssDef import *
 from githubDef import *
@@ -71,10 +72,11 @@ class GithubTest(unittest.TestCase):
                        'ref': 'refs/head/master'
                       }
                    }
-        url =  'http://archimedes.petaapan.org:16159/%s' % GITHUB
-        host = 'archimedes.petaapan.org'
-        ret = petaapan.utilities.sendJsonMsg.send(self.pushobj, url,
-                                                  dest_host=host,
-                                                  dest_port=16159)
+        url =  'http://poseidon:8080/%s' % GITHUB
+        host = 'poseidon'
+        status, reason = petaapan.utilities.sendJsonMsg.send(self.pushobj, url,
+                                                             dest_host=host,
+                                                             dest_port=8080)
+        self.assertTrue(status == httplib.ACCEPTED)
         print('github test return code: %s  reason: %s',
-              ret.status, ret.reason)
+              status, reason)

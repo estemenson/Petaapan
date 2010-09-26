@@ -1,0 +1,5 @@
+#! /bin/bash
+#
+# Script to load the Smartgit application
+
+"/C/Program Files (x86)/SmartGit 1.5/bin/smartgit.exe" &

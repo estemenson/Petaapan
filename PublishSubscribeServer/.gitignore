@@ -1,3 +1,7 @@
 petaapan
 .settings/
 appengine
+.project
+.pydevproject
+/.project
+/.pydevproject

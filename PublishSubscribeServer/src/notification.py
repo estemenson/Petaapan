@@ -19,37 +19,40 @@ from __future__ import unicode_literals
 
 import json
 import httplib
+import urllib
 import BaseHTTPServer
 
 class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
     def do_POST(self):
-        msg = json.load(self.rfile)
-        self.send_response(httplib.OK)
-        for o in self._observers:
-            o.notify(msg)
+        msg = json.loads(urllib.unquote_plus(self.rfile.read()))
+        try:
+            self.send_response(httplib.OK)
+        except Exception, ex:
+            pass
+        for o in ServerManager._observers:
+            o(msg)
     
 
 class ServerManager(object):
+    _observers = []
+    
     def __init__(self, server_class=BaseHTTPServer.HTTPServer,
                  handler_class=Handler, host='localhost', port=8080):
         self._host = host
         self._port = port
         self._server = server_class((host, port), handler_class)
         self._shutdown = False
-        self._observers = []
     
     def run(self): 
         while not self._shutdown:
             self._server.handle_request()       
-        for o in self._observers:
-            self._observers.remove(o)
-        self._observers = None
+        ServerManager._observers = None
         self._server = None
         
     def addObserver(self, observer):
-        self._observer.append(observer)
+        ServerManager._observers.append(observer)
     def removeObserver(self, observer):
-        self._observers.remove(observer)
+        ServerManager._observers.remove(observer)
 
     def getShutdown(self):
         return self._shutdown

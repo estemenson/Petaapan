@@ -15,13 +15,15 @@ from __future__ import unicode_literals
 
 import json
 import httplib
+import urllib
 
 def send(msg, url, dest_host='localhost', dest_port=8080):
     try:
         conn = httplib.HTTPConnection(dest_host, dest_port)
         if conn is not None:
             conn.connect()
-            conn.request('POST', url, json.dumps(msg))
+            conn.request('POST', url, urllib.quote_plus(json.dumps(msg),
+                                                        str('/')))
             ret = conn.getresponse()
             return (ret.status, ret.reason)
     finally:

@@ -34,7 +34,7 @@ class Test(unittest.TestCase):
 
 
     def testSubscription(self):
-        url = 'http://localhost:8080/%s' % SUBACTION
+        url = 'http://poseidon:8080/%s' % SUBACTION
         # Try to subscribe
         status = {REQ_SUBSCRIPTION: TEST_SUBSCRIBE,
                   REQ_PUBLISHER: GITHUB + '/jfgossage/Storyapp',

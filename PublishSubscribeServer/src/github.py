@@ -19,6 +19,7 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 import json
 import httplib
 import string
+import urllib
 
 from petaapan.utilities import reportException
 from pssDef import *
@@ -32,17 +33,16 @@ class MainPage(webapp.RequestHandler):
     
     def post(self):
         try:
-            gitpush = json.loads(self.request.body_file.getvalue())
-            if GITHUB_ID in gitpush:
-                publication = gitpush[GITHUB_ID]
+            str1 = unicode(urllib.unquote_plus(self.request.body_file.getvalue()))
+            if string.find(str1, 'payload=') >= 0:
+                msg = string.split(str1, 'payload=')[1]
+                gitpush = json.loads(msg)
                 self.response.set_status(httplib.ACCEPTED)
-                repo = publication['repository']
+                repo = gitpush['repository']
                 url = repo['url']
-                publisher = string.split(url, 'http://github.com/')[1]
+                publisher = GITHUB + '/' + string.split(url, 'http://github.com/')[1]
                 content_type = self.request.headers[CONTENT_TYPE]
-                queue_pub_notifications(publisher,
-                                        content_type,
-                                        self.request.body_file.getvalue())
+                queue_pub_notifications(publisher, content_type, gitpush)
             else:
                 # If we don't recognise the payload, send an accepted
                 # status anyway as this is likely from someone disruptive
@@ -56,7 +56,8 @@ class MainPage(webapp.RequestHandler):
             return
 
 
-application = webapp.WSGIApplication([('/%s' % GITHUB, MainPage)], debug=False)
+application = webapp.WSGIApplication([('/%s' % GITHUB, MainPage)],
+                                     debug=False)
 
 
 def main():
