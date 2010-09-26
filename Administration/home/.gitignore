@@ -4,3 +4,5 @@
 !bin/*
 !.gitignore
 !.bashrc
+!WebContent
+!WebContent/*
