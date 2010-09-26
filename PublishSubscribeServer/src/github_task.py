@@ -20,6 +20,7 @@ from google.appengine.api import urlfetch
 
 import json
 import httplib
+import urllib
 
 from petaapan.utilities import reportException
 from githubDef import *
@@ -29,20 +30,21 @@ from pssDef import *
 class GithubWorker(webapp.RequestHandler):
     def post(self):
         try:
-            gitpush = json.loads(self.request.body_file.getvalue())
+            gitpush = json.loads(urllib.unquote_plus(self.request.body_file.getvalue()))
             content_type = gitpush[CONTENT_TYPE]
             subscriber = gitpush[SUBSCRIBER]
             result = urlfetch.fetch(url=subscriber,
                                     payload=self.request.body_file.getvalue(),
                                     method=urlfetch.POST,
                                     headers={CONTENT_TYPE: content_type})
+            return
         except Exception, ex:
             self.response.set_status(httplib.UNPROCESSABLE_ENTITY,
                                      reportException.report(ex))
             return
         
         
-application = webapp.WSGIApplication([('/%s' % GITHUB_TASK_URL, GithubWorker)],
+application = webapp.WSGIApplication([(GITHUB_TASK_URL, GithubWorker)],
                                      debug=False)
 
 

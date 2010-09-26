@@ -17,9 +17,29 @@ import notification
 
 class Test(unittest.TestCase):
 
+    class HandleNotification(object):
+        def __init__(self, test, context):
+            self._test = test
+            self._context = context
+            
+        def __call__(self, msg):
+            try:
+                self._test.assertTrue('payload' in msg)
+                git = msg['payload']
+                self._test.assertTrue('repository' in git)
+                self._test.assertTrue('before' in git)
+                self._test.assertTrue('commits' in git)
+                self._test.assertTrue('after' in git)
+                self._test.assertTrue('ref' in git)
+            finally:
+                self._context.shutdown = True
 
     def testName(self):
-        notification.ServerManager()
+        server = notification.ServerManager(port=16160)
+        server.addObserver(Test.HandleNotification(self, server))
+        server.run()
+        # WARNING: Will not return until a message has been received
+        
 
 
 if __name__ == "__main__":

@@ -19,6 +19,7 @@ from pssDef import *
 from githubDef import *
 
 import json
+import urllib
 
 subscribers_to_pub\
     = "SELECT * FROM Subscriber WHERE status = :1 AND publisher = :2"
@@ -49,8 +50,11 @@ def load_online_subscribers(publisher):
 def queue_pub_notifications(publisher, content_type, payload):
     query = db.GqlQuery(subscribers_to_pub, SUBSCRIBE, publisher)
     for subscriber in query:
+        parm = {SUBSCRIBER: 'http://%s:%s' % (subscriber.user_ip,
+                                       subscriber.user_port),
+                CONTENT_TYPE: content_type,
+                GITHUB_ID : payload
+               }
         taskqueue.add(url=GITHUB_TASK_URL,
-                      params=json.dumps({SUBSCRIBER: '%s:%s' % (subscriber.user_ip,
-                                                                subscriber.user_port),
-                                         CONTENT_TYPE: content_type,
-                                         GITHUB_ID : payload[GITHUB_ID]}))
+                      queue_name=GITHUB,
+                      payload=urllib.quote_plus(json.dumps(parm), str('/')))

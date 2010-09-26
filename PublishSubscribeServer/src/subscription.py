@@ -18,6 +18,7 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 
 import json
 import httplib
+import urllib
 import string
 
 from petaapan.utilities import reportException
@@ -35,7 +36,7 @@ class MainPage(webapp.RequestHandler):
     def post(self):
         try:
             ipaddr = self.request.remote_addr
-            req = json.loads(self.request.body_file.getvalue())
+            req = json.loads(urllib.unquote_plus(self.request.body_file.getvalue()))
             if REQ_SUBSCRIPTION not in req or REQ_PUBLISHER not in req:
                 self.response.set_status(httplib.PRECONDITION_FAILED,
                 'No or incomplete subscription status provided in request')

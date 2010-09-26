@@ -12,6 +12,7 @@ handlers:
   
 - url: /tasks/github
   script: github_task.py
+  login: admin
   
 - url: /
   script: not_accepted.py
