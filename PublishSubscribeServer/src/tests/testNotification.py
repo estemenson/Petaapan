@@ -12,7 +12,8 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import unittest
-import notification
+if __name__ != "__main__":
+    import notification
 
 
 class Test(unittest.TestCase):
@@ -44,4 +45,9 @@ class Test(unittest.TestCase):
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
+    import sys
+    import os
+    sys.path.insert(0, os.getcwd())
+    import notification
+    
     unittest.main()
