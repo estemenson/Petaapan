@@ -39,5 +39,5 @@ def report(ex, logger=None):
     
     if logger:
         for ln in st:
-            logger.error(ln)
+            logger(ln)
     return st

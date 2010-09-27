@@ -22,16 +22,21 @@ if __name__ != '__main__':
 TEST_PORT = 16160
 
 def main():
+    ln = len(sys.argv)
     url = sys.argv[1]
     id = sys.argv[2]
+    host = sys.argv[3] if ln > 3 else None
+    port = sys.argv[4] if ln > 4 else None
     url = '%s%s' % (url, SUBACTION)
     # Try to subscribe
     status = {REQ_SUBSCRIPTION: TEST_SUBSCRIBE,
               REQ_PUBLISHER: GITHUB + '/jfgossage/Storyapp',
               REQ_PORT: TEST_PORT,
               USER_ID: id}
-              
-    status, reason, headers = sendJsonMsg.send(status, url)
+    
+    print('About to connect to %s' % url)          
+    status, reason, headers = sendJsonMsg.send(status, url,
+                                               host, port)
     if status > 299:
         print('Subscription failed status %s: Reason %s' % (status, reason))
         print(headers)
