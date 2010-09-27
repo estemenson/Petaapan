@@ -21,6 +21,7 @@ handlers:
   
 - url: /favicon.ico
   static_files: static/images/favicon.ico
+  mime_type: image/vnd.microsoft.icon
   upload: static/images/favicon.ico
   
 - url: /
