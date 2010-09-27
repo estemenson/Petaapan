@@ -20,6 +20,7 @@ def report(ex, logger=None):
     # Report information from exception
     st = []
     st.append(['Exception Report\n', '\n'])
+    st.append(['\t%s' % str(ex), '\n'])
     st.append(['Exception Arguments\n'])
     if ex.args and len(ex.args) > 0: st.append(['\tError: %s\n' % ex.args[0]])
     if ex.args and len(ex.args) > 1: st.append(['\tDescription: %s\n' % ex.args[1]]) 

@@ -21,6 +21,7 @@ from django.utils import simplejson
 
 import httplib
 import urllib
+import logging
 
 from petaapan.utilities import reportException
 from githubDef import *
@@ -32,17 +33,17 @@ class GithubWorker(webapp.RequestHandler):
         try:
             gitpush = simplejson.loads(\
                         urllib.unquote_plus(self.request.body_file.getvalue()))
-            content_type = gitpush[CONTENT_TYPE]
             subscriber = gitpush[SUBSCRIBER]
             result = urlfetch.fetch(url=subscriber,
                                     payload=self.request.body_file.getvalue(),
-                                    method=urlfetch.POST,
-                                    headers={CONTENT_TYPE: content_type})
+                                    method=urlfetch.POST)
+            
             return
         except Exception, ex:
-            self.response.set_status(httplib.UNPROCESSABLE_ENTITY,
-                                     reportException.report(ex))
+            reportException.report(ex, logging.error)
             return
+        finally:
+            self.response.set_status(httplib.OK)
         
         
 application = webapp.WSGIApplication([(GITHUB_TASK_URL, GithubWorker)],

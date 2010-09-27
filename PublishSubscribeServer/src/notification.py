@@ -21,6 +21,9 @@ import json
 import httplib
 import urllib
 import BaseHTTPServer
+import logging
+
+from petaapan.utilities import reportException
 
 class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
     def do_POST(self):
@@ -28,7 +31,7 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
         try:
             self.send_response(httplib.OK)
         except Exception, ex:
-            pass
+            reportException(ex, logging.error)
         for o in ServerManager._observers:
             o(msg)
     

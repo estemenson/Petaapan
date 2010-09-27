@@ -47,12 +47,11 @@ def load_online_subscribers(publisher):
     return ul
 
 
-def queue_pub_notifications(publisher, content_type, payload):
+def queue_pub_notifications(publisher, payload):
     query = db.GqlQuery(subscribers_to_pub, SUBSCRIBE, publisher)
     for subscriber in query:
         parm = {SUBSCRIBER: 'http://%s:%s' % (subscriber.user_ip,
                                        subscriber.user_port),
-                CONTENT_TYPE: content_type,
                 GITHUB_ID : payload
                }
         taskqueue.add(url=GITHUB_TASK_URL,
