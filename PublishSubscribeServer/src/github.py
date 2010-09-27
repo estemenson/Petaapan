@@ -36,6 +36,7 @@ class MainPage(webapp.RequestHandler):
         try:
             str1 = unicode(urllib.unquote_plus(self.request.body_file.getvalue()))
             if string.find(str1, 'payload=') >= 0:
+                logging.info("Received payload from Github")
                 msg = string.split(str1, 'payload=')[1]
                 gitpush = simplejson.loads(msg)
                 self.response.set_status(httplib.ACCEPTED)

@@ -12,6 +12,8 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import unittest
+import logging
+
 if __name__ != "__main__":
     import notification
 
@@ -32,6 +34,8 @@ class Test(unittest.TestCase):
                 self._test.assertTrue('commits' in git)
                 self._test.assertTrue('after' in git)
                 self._test.assertTrue('ref' in git)
+                logging.info('Received payload from Google')
+                
             finally:
 #                self._context.shutdown = True
                 pass
