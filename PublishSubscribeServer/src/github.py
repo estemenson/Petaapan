@@ -36,20 +36,20 @@ class MainPage(webapp.RequestHandler):
         try:
             str1 = unicode(urllib.unquote_plus(self.request.body_file.getvalue()))
             if string.find(str1, 'payload=') >= 0:
-                logging.info("Received payload from Github")
                 msg = string.split(str1, 'payload=')[1]
                 gitpush = simplejson.loads(msg)
                 self.response.set_status(httplib.ACCEPTED)
                 repo = gitpush['repository']
                 url = repo['url']
                 publisher = GITHUB + '/' + string.split(url, 'http://github.com/')[1]
-                content_type = self.request.headers[CONTENT_TYPE]
-                queue_pub_notifications(publisher, content_type, gitpush)
+                queue_pub_notifications(publisher, gitpush)
             else:
                 # If we don't recognise the payload, send an accepted
                 # status anyway as this is likely from someone disruptive
                 # and it would be a good idea to give the disrupter as
                 # little information as possible
+                logging.warning('''Received invalid message, theoretically from Github.\n'''
+                                '''   Headers; %s\n   Payload: %s''' % self.headers, str1)
                 self.response.set_status(httplib.OK)
             return
         except Exception , ex:

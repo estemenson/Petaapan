@@ -1,4 +1,4 @@
-#!/bin/bash -v
+#!/bin/bash
 # Script to prepare Publish/Subscribe server for deployment to Google
 # and optionally do the deployment
 # The script will run in the root directory of the

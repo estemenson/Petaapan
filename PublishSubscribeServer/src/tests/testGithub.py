@@ -14,9 +14,11 @@ from __future__ import unicode_literals
 
 import unittest
 import httplib
-import petaapan.utilities.sendJsonMsg
-from pssDef import *
-from githubDef import *
+
+if __name__ != "__main__":
+    import petaapan.utilities.sendJsonMsg
+    from pssDef import *
+    from githubDef import *
 
 class GithubTest(unittest.TestCase):
        
@@ -72,11 +74,22 @@ class GithubTest(unittest.TestCase):
                        'ref': 'refs/head/master'
                       }
                    }
-        url =  'http://poseidon:8080/%s' % GITHUB
-        host = 'poseidon'
+        url =  'http://agimanserver.appspot.com/%s' % GITHUB
+        host = 'agimanserver.appspot.com'
         status, reason = petaapan.utilities.sendJsonMsg.send(self.pushobj, url,
-                                                             dest_host=host,
-                                                             dest_port=8080)
+                                                             host, 80)
         self.assertTrue(status == httplib.ACCEPTED)
         print('github test return code: %s  reason: %s',
               status, reason)
+        
+if __name__ == "__main__":
+    #import sys;sys.argv = ['', 'Test.testName']
+    import sys
+    import os
+    sys.path.insert(0, os.getcwd())
+    import petaapan.utilities.sendJsonMsg
+    from pssDef import *
+    from githubDef import *
+
+    ret = unittest.main()
+    exit(ret)

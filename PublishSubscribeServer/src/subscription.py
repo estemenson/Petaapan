@@ -36,7 +36,6 @@ class MainPage(webapp.RequestHandler):
     
     def post(self):
         try:
-            ipaddr = self.request.remote_addr
             req = simplejson.loads(urllib.unquote_plus(self.request.body_file.getvalue()))
             if REQ_SUBSCRIPTION not in req or REQ_PUBLISHER not in req:
                 self.response.set_status(httplib.PRECONDITION_FAILED,
@@ -57,7 +56,7 @@ class MainPage(webapp.RequestHandler):
             guser = users.get_current_user()
             if not guser:
                 guser = users.User(email=req[USER_ID])
-                if guser.user_id() == None:
+                if guser.user_id() == None and not testing:
                     self.response.set_status(httplib.NOT_ACCEPTABLE,
                              'Urecognized Google user')
                         
@@ -74,12 +73,16 @@ class MainPage(webapp.RequestHandler):
             uid = guser.user_id()
             if testing and uid is None:
                 uid = string.split(guser.email(),'@')[0]
-            key = uid+ipaddr+str(port)
+            key = uid+req[SUBSCRIBER_DNS]+str(port)
             cuser = ul[key] if key in ul else None
             if cuser is None:
                 cuser = Subscriber(google_id=guser, status=status,
-                                   user_ip=ipaddr, user_port=port,
-                                   publisher=publisher)
+                                   user_ip=req[SUBSCRIBER_DNS], user_port=port,
+                                   email_address=guser.email(),
+                                   publisher=publisher,
+                                   first_name=req[FIRST_NAME],
+                                   middle_name=req[MIDDLE_NAME],
+                                   last_name=req[LAST_NAME])
                 self.cache.update(publisher, key, cuser)
             
             # If user is coming online update

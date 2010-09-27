@@ -14,6 +14,9 @@ from __future__ import unicode_literals
 import unittest
 import logging
 
+logging.basicConfig(level=logging.DEBUG)
+logging.info('About to run test notification')
+
 if __name__ != "__main__":
     import notification
 
@@ -27,6 +30,7 @@ class Test(unittest.TestCase):
             
         def __call__(self, msg):
             try:
+                logging.info("Got payload from Google")
                 self._test.assertTrue('payload' in msg)
                 git = msg['payload']
                 self._test.assertTrue('repository' in git)
@@ -34,14 +38,14 @@ class Test(unittest.TestCase):
                 self._test.assertTrue('commits' in git)
                 self._test.assertTrue('after' in git)
                 self._test.assertTrue('ref' in git)
-                logging.info('Received payload from Google')
+                logging.info('Verified payload from Google is valid')
                 
             finally:
 #                self._context.shutdown = True
                 pass
 
     def testName(self):
-        server = notification.ServerManager(port=16160)
+        server = notification.ServerManager(host='0.0.0.0', port=16160)
         server.addObserver(Test.HandleNotification(self, server))
         server.run()
         # WARNING: Will not return until a message has been received
