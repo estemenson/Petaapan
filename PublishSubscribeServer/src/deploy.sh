@@ -103,7 +103,7 @@ then
     # Tell user to make Github talk to us
     if [[ $Upload == 1 ]]
     then
-        read -p "Please tell Github to talk to us. When test is complete type 'y' if you still want to upload"
+        read -p "Please tell Github to talk to us. When test is complete type 'y' if you still want to upload: "
         if [[ ! ($Var -eq 'y' || $Var -eq 'Y' || $Var -eq 'yes') ]]; then Upload=0; fi
     fi 
     # Kill the test apps
