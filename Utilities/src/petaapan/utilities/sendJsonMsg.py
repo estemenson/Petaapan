@@ -27,8 +27,20 @@ def send(msg, url, dest_host='localhost', dest_port=8080,
         conn = httplib.HTTPConnection(host, port)
         if conn is not None:
             conn.connect()
-            conn.request('POST', url, urllib.quote_plus(json.dumps(msg),
-                                                        str('/')))
+            js = None
+            qp = None
+            try:
+                js = json.dumps(msg)
+            except Exception, ex:
+                
+                return (httplib.UNPROCESSABLE_ENTITY,
+                        reportException.report(ex, logging.error), None)
+            try:
+                qp = urllib.quote_plus(js, str('/'))
+            except Exception, ex:
+                return (httplib.UNPROCESSABLE_ENTITY,
+                        reportException.report(ex, logging.error), None)
+            conn.request('POST', url, qp)
             ret = conn.getresponse()
             return (ret.status, ret.reason, ret.getheaders())
     except Exception, ex:
