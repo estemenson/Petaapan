@@ -15,8 +15,8 @@ from __future__ import with_statement
 from google.appengine.ext import webapp
 from google.appengine.api import users
 from google.appengine.ext.webapp.util import run_wsgi_app
+from django.utils import simplejson
 
-import json
 import httplib
 import urllib
 import string
@@ -37,7 +37,7 @@ class MainPage(webapp.RequestHandler):
     def post(self):
         try:
             ipaddr = self.request.remote_addr
-            req = json.loads(urllib.unquote_plus(self.request.body_file.getvalue()))
+            req = simplejson.loads(urllib.unquote_plus(self.request.body_file.getvalue()))
             if REQ_SUBSCRIPTION not in req or REQ_PUBLISHER not in req:
                 self.response.set_status(httplib.PRECONDITION_FAILED,
                 'No or incomplete subscription status provided in request')

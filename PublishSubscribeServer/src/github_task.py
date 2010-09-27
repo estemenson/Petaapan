@@ -17,8 +17,8 @@ from __future__ import with_statement
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api import urlfetch
+from django.utils import simplejson
 
-import json
 import httplib
 import urllib
 
@@ -30,7 +30,8 @@ from pssDef import *
 class GithubWorker(webapp.RequestHandler):
     def post(self):
         try:
-            gitpush = json.loads(urllib.unquote_plus(self.request.body_file.getvalue()))
+            gitpush = simplejson.loads(\
+                        urllib.unquote_plus(self.request.body_file.getvalue()))
             content_type = gitpush[CONTENT_TYPE]
             subscriber = gitpush[SUBSCRIBER]
             result = urlfetch.fetch(url=subscriber,
