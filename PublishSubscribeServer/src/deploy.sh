@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -v
 # Script to prepare Publish/Subscribe server for deployment to Google
 # and optionally do the deployment
 # The script will run in the root directory of the
@@ -52,6 +52,8 @@ fi
 # Create the deployment tree
 mkdir -p ../deploy/petaapan/utilities
 if [[ $? != 0 ]]; then exit 1; fi
+mkdir -p ../deploy/static/images
+if [[ $? != 0 ]]; then exit 1; fi
 
 # Get the control files
 cp -dpu *.yaml ../deploy
@@ -62,7 +64,7 @@ cp -dpu *.py ../deploy
 if [[ $? != 0 ]]; then exit 1; fi
 
 # Get favicon.ico
-cp -pu ../../Administration/home/WebContent/favicon.ico ../deploy
+cp -pu ../../Administration/home/WebContent/favicon.ico ../deploy/static/images
 if [[ $? != 0 ]]; then exit 1; fi
 
 # Copy utility python files
@@ -76,10 +78,10 @@ cd ../..
 # Now we need to test the deployment to verify that it
 # is complete
 # Launch the development server running our application
-if [[ $RUNTEST == 1]]
-    then
+if [[ $Runtest == 1 ]]
+then
     python "$Gp/dev_appserver.py" --clear_datastore --address=0.0.0.0\
-           "$ROOT" &
+           "$Root" &
     App_pid=$!
 
     # Launch our HTTP server that listens for notifications from Google
@@ -99,9 +101,11 @@ if [[ $RUNTEST == 1]]
     fi
 
     # Tell user to make Github talk to us
-    read -p "Please tell Github to talk to us. When test is complete type 'y' to upload" Var
-
-    if [[ ! ($Var -eq 'y' || $Var -eq 'Y' || $Var -eq 'yes') ]]; then Upload=0; fi 
+    if [[ $Upload == 1 ]]
+    then
+        read -p "Please tell Github to talk to us. When test is complete type 'y' if you still want to upload"
+        if [[ ! ($Var -eq 'y' || $Var -eq 'Y' || $Var -eq 'yes') ]]; then Upload=0; fi
+    fi 
     # Kill the test apps
     kill $Notification_pid
     kill $App_pid
@@ -111,7 +115,7 @@ fi
 # Upload the deployment to Google
 if [[ $Upload == 1 ]]
 then
-    python --email=jgossage@gmail.com "$Gp/appcfg.py" update ../deploy/
+    python "$Gp/appcfg.py" --email=jgossage@gmail.com  update ../deploy/
     if [[ $? != 0 ]]; then exit 1; fi
 fi
 

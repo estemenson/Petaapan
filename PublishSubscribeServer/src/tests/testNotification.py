@@ -33,7 +33,8 @@ class Test(unittest.TestCase):
                 self._test.assertTrue('after' in git)
                 self._test.assertTrue('ref' in git)
             finally:
-                self._context.shutdown = True
+#                self._context.shutdown = True
+                pass
 
     def testName(self):
         server = notification.ServerManager(port=16160)

@@ -20,6 +20,7 @@ import json
 import httplib
 import urllib
 import string
+import logging
 
 from petaapan.utilities import reportException
 from pssDef import *
@@ -107,7 +108,7 @@ class MainPage(webapp.RequestHandler):
             
         except Exception , ex:
             self.response.set_status(httplib.UNPROCESSABLE_ENTITY,
-                                     reportException.report(ex))
+                                     reportException.report(ex, logging.error))
             return
             
         
