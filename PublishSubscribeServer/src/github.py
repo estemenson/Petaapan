@@ -15,8 +15,8 @@ from __future__ import with_statement
 
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
+from django.utils import simplejson
 
-import json
 import httplib
 import string
 import urllib
@@ -37,7 +37,7 @@ class MainPage(webapp.RequestHandler):
             str1 = unicode(urllib.unquote_plus(self.request.body_file.getvalue()))
             if string.find(str1, 'payload=') >= 0:
                 msg = string.split(str1, 'payload=')[1]
-                gitpush = json.loads(msg)
+                gitpush = simplejson.loads(msg)
                 self.response.set_status(httplib.ACCEPTED)
                 repo = gitpush['repository']
                 url = repo['url']

@@ -15,10 +15,10 @@ from __future__ import with_statement
 
 from google.appengine.ext import db
 from google.appengine.api.labs import taskqueue
+from django.utils import simplejson
 from pssDef import *
 from githubDef import *
 
-import json
 import urllib
 
 subscribers_to_pub\
@@ -57,4 +57,5 @@ def queue_pub_notifications(publisher, content_type, payload):
                }
         taskqueue.add(url=GITHUB_TASK_URL,
                       queue_name=GITHUB,
-                      payload=urllib.quote_plus(json.dumps(parm), str('/')))
+                      payload=urllib.quote_plus(simplejson.dumps(parm),
+                                                str('/')))
