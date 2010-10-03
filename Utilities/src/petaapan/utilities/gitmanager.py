@@ -27,6 +27,7 @@ SHUTDOWN = 'Shutdown'
 SAVE = 'Save'
 COMMIT = 'Commit'
 MV = 'Mv'
+RM = 'Rm'
     
 
 class GitManager(threading.Thread):
@@ -109,13 +110,21 @@ class GitManager(threading.Thread):
         in the local file system if the local repository is not
         available
         
-        files:   list of objects to be saved
-                 if None or the list is empty all new and modified objects
-                 will be saved, otherwise only the user specified objects will
-                 be saved
-        message: the commit message to be used for the local commit
+        old:   Old name
+        new:   New name
         '''
         self._internalQueue.put((MV, (old, new)), False)
+
+            
+    def rm(self, file):
+        '''
+        Removes an object within the local repository or
+        in the local file system if the local repository is not
+        available
+        
+        file:    object to be removed
+        '''
+        self._internalQueue.put((RM, (file)), False)
         
         
     def run(self):
@@ -175,12 +184,20 @@ class GitManager(threading.Thread):
                 self._response_queue.put((MV, data.ret), False)
                 data.ret = None
                 
+        def internalRm(self, args):
+            try:
+                data.ret = self.doGitRm(args[0])
+            finally:
+                self._response_queue.put((RM, data.ret), False)
+                data.ret = None
+                
             
             
         data.dispatcher = {SAVE : internalSave,
                            SHUTDOWN: internalShutdown,
                            COMMIT: internalCommit,
-                           MV: internalMv}
+                           MV: internalMv,
+                           RM: internalRm}
         while not data.do_shutdown:
             args = self._internalQueue.get(True)
             if args[0] in data.dispatcher:
@@ -221,6 +238,17 @@ class GitManager(threading.Thread):
         else:
             try:
                 os.rename(old, new)
+                return (0, [], [], set([]))
+            except Exception, ex:
+                return (1, [], reportException.report(ex), set([])) 
+    
+    def doGitRm(self, file):
+        if self._localrepo is not None:
+            args = ['git','rm', file]
+            return self.runCommand(args)
+        else:
+            try:
+                os.remove(file)
                 return (0, [], [], set([]))
             except Exception, ex:
                 return (1, [], reportException.report(ex), set([])) 
