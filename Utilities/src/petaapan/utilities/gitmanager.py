@@ -18,6 +18,7 @@ import subprocess
 import threading
 import Queue
 import string
+from os.path import relpath, abspath, isabs
 import os
 
 from petaapan.utilities import reportException
@@ -210,8 +211,9 @@ class GitManager(threading.Thread):
             # User wants everything saved - modified and new objects
             args.append('--all')
         else:
-            # User wants a specified list of objects saved 
-            args += files
+            # User wants a specified list of objects saved
+            for f in files:
+                args += self.normalizePath(f) 
         return self.runCommand(args)
     
     def doGitCommit(self, message):
@@ -233,22 +235,32 @@ class GitManager(threading.Thread):
     
     def doGitMv(self, old, new):
         if self._localrepo is not None:
-            args = ['git','mv', old, new]
+            args = ['git','mv', self.normalizePath(old),
+                    self.normalizePath(new)]
             return self.runCommand(args)
         else:
             try:
-                os.rename(old, new)
+                _old = abspath(old) if not isabs(old) else old
+                _new = abspath(new) if not isabs(new) else new
+                os.rename(_old, _new)
                 return (0, [], [], set([]))
             except Exception, ex:
                 return (1, [], reportException.report(ex), set([])) 
     
     def doGitRm(self, file):
         if self._localrepo is not None:
-            args = ['git','rm', file]
+            args = ['git','rm', self.normalizePath(file)]
             return self.runCommand(args)
         else:
             try:
-                os.remove(file)
+                _file = abspath(file) if not isabs(file) else file
+                os.remove(_file)
                 return (0, [], [], set([]))
             except Exception, ex:
                 return (1, [], reportException.report(ex), set([])) 
+            
+    def normalizePath(self, path):
+        '''
+        Converts path to a path relative to the local repository base
+        '''
+        return relpath(path, self._localrepo)
