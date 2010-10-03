@@ -18,10 +18,15 @@ import subprocess
 import threading
 import Queue
 import string
+import os
+
+from petaapan.utilities import reportException
 
 GIT_SAVE = 'GitSave'
 SHUTDOWN = 'Shutdown'
 SAVE = 'Save'
+COMMIT = 'Commit'
+MV = 'Mv'
     
 
 class GitManager(threading.Thread):
@@ -73,13 +78,44 @@ class GitManager(threading.Thread):
         to the remote repository if possible. This method is invoked
         by our users
         
-        files: list of objects to be saved
-               if None or the list is empty all new and modified objects
-               will be saved, otherwise only the user specified objects will
-               be saved
+        files:   list of objects to be saved
+                 if None or the list is empty all new and modified objects
+                 will be saved, otherwise only the user specified objects will
+                 be saved
+        message: the commit message to be used for the local commit
         '''
         if self._localrepo is not None:
             self._internalQueue.put((SAVE, (files, message)), False)
+
+            
+    def commit(self, files, message):
+        '''
+        Commits objects to the local repository without pushing them
+        to the remote repository. This method is invoked by our users
+        
+        files:   list of objects to be saved
+                 if None or the list is empty all new and modified objects
+                 will be saved, otherwise only the user specified objects will
+                 be saved
+        message: the commit message to be used for the local commit
+        '''
+        if self._localrepo is not None:
+            self._internalQueue.put((COMMIT, (files, message)), False)
+
+            
+    def mv(self, old, new):
+        '''
+        Renames or moves an object within the local repository or
+        in the local file system if the local repository is not
+        available
+        
+        files:   list of objects to be saved
+                 if None or the list is empty all new and modified objects
+                 will be saved, otherwise only the user specified objects will
+                 be saved
+        message: the commit message to be used for the local commit
+        '''
+        self._internalQueue.put((MV, (old, new)), False)
         
         
     def run(self):
@@ -117,10 +153,34 @@ class GitManager(threading.Thread):
         def internalShutdown(self, args):
             data.doShutdown = True
             self._response_queue.put((SHUTDOWN))
+            data.ret = None
+            
+        def internalCommit(self, args):
+            files, message = args
+            try:
+                data.ret = self.doGitAdd(files)
+                if data.ret[0] != 0:
+                    return
+                data.ret = self.doGitCommit(message)
+                return
+            finally:
+                self._response_queue.put((COMMIT, data.ret), False)
+                data.ret = None
+                
+        def internalMv(self, args):
+            old, new = args
+            try:
+                data.ret = self.doGitMv(old, new)
+            finally:
+                self._response_queue.put((MV, data.ret), False)
+                data.ret = None
+                
             
             
         data.dispatcher = {SAVE : internalSave,
-                           SHUTDOWN: internalShutdown}
+                           SHUTDOWN: internalShutdown,
+                           COMMIT: internalCommit,
+                           MV: internalMv}
         while not data.do_shutdown:
             args = self._internalQueue.get(True)
             if args[0] in data.dispatcher:
@@ -153,3 +213,14 @@ class GitManager(threading.Thread):
     def doGitPush(self):
         args = ['git', 'push']
         return self.runCommand(args)
+    
+    def doGitMv(self, old, new):
+        if self._localrepo is not None:
+            args = ['git','mv', old, new]
+            return self.runCommand(args)
+        else:
+            try:
+                os.rename(old, new)
+                return (0, [], [], set([]))
+            except Exception, ex:
+                return (1, [], reportException.report(ex), set([])) 
