@@ -67,6 +67,9 @@ class ConsoleLogger(object):
     def info(self, msg):
         if self._log and self._enabled:
             self._log.info(msg)
+    def exception(self, msg):
+        if (self._log and self._enabled):
+            self._log.exception(msg)
         
     def setLevel(self, level):
         if self._log:
