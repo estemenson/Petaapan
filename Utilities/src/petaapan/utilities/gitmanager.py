@@ -18,7 +18,6 @@ import subprocess
 import threading
 import Queue
 import string
-from os.path import relpath, abspath, isabs
 import os
 
 from petaapan.utilities import reportException
@@ -56,9 +55,10 @@ class GitManager(threading.Thread):
         '''
         if self._localrepo is not None:
             self._internalQueue.put((SHUTDOWN, (None)), True, 60)
+            return self._response_queue.get(True, 60)
         
         
-    def runCommand(self, args):
+    def runCommand(self, cmd, ret, args):
         _consoleStdout = []
         _consoleStderr = []
         _commits = set([])
@@ -69,10 +69,16 @@ class GitManager(threading.Thread):
         stdout, stderr = p.communicate()
         _result = p.wait()
         if stdout is not None and len(stdout) != 0:
-            _consoleStdout += string.split(stdout, '\n')
+            for l in string.split(stdout, '\n'):
+                _consoleStdout.append(cmd + ': ' + l)
+        _consoleStdout.append('%s terminated with code %i' % (cmd, _result)) 
         if stderr is not None and len(stderr) != 0:
-            _consoleStdout += string.split(stderr, '\n')
-        return (_result, _consoleStdout, _consoleStderr, _commits)
+            for l in string.split(stderr, '\n'):
+                _consoleStderr.append(cmd + ': ' + l)
+        if (_result > 0 and _result > ret[0]):
+            ret[0] = _result
+        ret[1] += _consoleStdout
+        ret[2] += _consoleStderr
         
     def save(self, files, message):
         '''
@@ -140,20 +146,21 @@ class GitManager(threading.Thread):
             actually perform the requested work
             '''
             files, message = args
+            data.ret = [0, [], [], set([])]
             try:
-                data.ret = self.doGitAdd(files)
+                self.doGitAdd(data.ret, files)
                 if data.ret[0] != 0:
                     return
-                data.ret = self.doGitCommit(message)
+                self.doGitCommit(data.ret, message)
                 if data.ret[0] != 0:
                     return
-                data.ret = self.doGitFetch()
+                self.doGitFetch(data.ret)
                 if data.ret[0] != 0:
                     return
-                data.ret = self.doGitMerge()
+                self.doGitMerge(data.ret)
                 if data.ret[0] != 0:
                     return
-                data.ret = self.doGitPush()
+                self.doGitPush(data.ret)
                 return
             finally:
                 self._response_queue.put((SAVE, data.ret), False)
@@ -162,16 +169,19 @@ class GitManager(threading.Thread):
         
         def internalShutdown(self, args):
             data.doShutdown = True
-            self._response_queue.put((SHUTDOWN))
+            self._response_queue.put((SHUTDOWN,
+                                      [0, ['Asynchronous services shutdown'],
+                                       [], set([])]))
             data.ret = None
             
         def internalCommit(self, args):
             files, message = args
+            data.ret = [0, [], [], set([])]
             try:
-                data.ret = self.doGitAdd(files)
+                self.doGitAdd(data.ret, files)
                 if data.ret[0] != 0:
                     return
-                data.ret = self.doGitCommit(message)
+                self.doGitCommit(data.ret, message)
                 return
             finally:
                 self._response_queue.put((COMMIT, data.ret), False)
@@ -179,15 +189,29 @@ class GitManager(threading.Thread):
                 
         def internalMv(self, args):
             old, new = args
+            data.ret = [0,[],[], set([])]
             try:
-                data.ret = self.doGitMv(old, new)
+                self.doGitAdd(data.ret, None)
+                if data.ret[0] != 0:
+                    return
+                self.doGitCommit(data.ret, 'Cleanup before Git mv')
+                if data.ret[0] != 0:
+                    return
+                self.doGitMv(data.ret, old, new)
             finally:
                 self._response_queue.put((MV, data.ret), False)
                 data.ret = None
                 
         def internalRm(self, args):
+            data.ret = [0, [], [], set([])]
             try:
-                data.ret = self.doGitRm(args[0])
+                self.doGitAdd(data.ret, None)
+                if data.ret[0] != 0:
+                    return
+                self.doGitCommit(data.ret, 'Cleanup before Git rm')
+                if data.ret[0] != 0:
+                    return
+                self.doGitRm(data.ret, args)
             finally:
                 self._response_queue.put((RM, data.ret), False)
                 data.ret = None
@@ -205,62 +229,77 @@ class GitManager(threading.Thread):
                 data.dispatcher[args[0]](self, args[1])
         return
             
-    def doGitAdd(self, files):
+    def doGitAdd(self, ret, files):
         args = ['git', 'add']
         if files is None or len(files) == 0:
             # User wants everything saved - modified and new objects
             args.append('--all')
         else:
             # User wants a specified list of objects saved
-            for f in files:
-                args += self.normalizePath(f) 
-        return self.runCommand(args)
+            if not isinstance(files, list):
+                files = [files]
+            args += files 
+        self.runCommand('Git add', ret, args)
     
-    def doGitCommit(self, message):
-        args = ['git', 'commit', '-m', message]
-        return self.runCommand(args)
+    def doGitCommit(self, ret, message):
+        '''
+        We need to see if there is a need to run the Git commit command
+        This is because Git commit considers it an error
+        if you try to commit when there is nothing to commit.
+        Accordingly we run the Git status command and parse the output
+        to see if it is necessary to run Git commit
+        '''
+        args = ['git', 'status']
+        iret = [0, [], [], set([])]
+        self.runCommand('Git status', iret, args)
+        if iret[0] != 0:
+            ret[0] = iret[0]
+            ret[1] += iret[1]
+            ret[2] += iret[2]
+            return # Status command failed
+        doCommit = True
+        for l in iret[1]:
+            if string.find(l, 'nothing to commit') >= 0:
+                doCommit = False
+                break
+        if doCommit:
+            args = ['git', 'commit', '-m', message]
+            self.runCommand('Git commit', ret, args)
 
-    def doGitFetch(self):
+    def doGitFetch(self, ret):
         args = ['git', 'fetch']
-        return self.runCommand(args)
+        self.runCommand('Git fetch', ret, args)
 
-    def doGitMerge(self):
+    def doGitMerge(self, ret):
         args = ['git', 'merge', '--commit', '-m', 'Merged pull from remote',
                 'remotes/origin/master']
-        return self.runCommand(args)
+        self.runCommand('Git merge', ret, args)
     
-    def doGitPush(self):
+    def doGitPush(self, ret):
         args = ['git', 'push']
-        return self.runCommand(args)
+        self.runCommand('Git push', ret, args)
     
-    def doGitMv(self, old, new):
+    def doGitMv(self, ret, old, new):
         if self._localrepo is not None:
-            args = ['git','mv', self.normalizePath(old),
-                    self.normalizePath(new)]
-            return self.runCommand(args)
+            args = ['git','mv', old, new]
+            self.runCommand('Git mv', ret, args)
         else:
             try:
-                _old = abspath(old) if not isabs(old) else old
-                _new = abspath(new) if not isabs(new) else new
-                os.rename(_old, _new)
-                return (0, [], [], set([]))
+                os.rename(old, new)
             except Exception, ex:
-                return (1, [], reportException.report(ex), set([])) 
+                ret[0] = 1
+                ret[1].append(reportException.report(ex))
     
-    def doGitRm(self, file):
+    def doGitRm(self, ret, file):
         if self._localrepo is not None:
-            args = ['git','rm', self.normalizePath(file)]
-            return self.runCommand(args)
+            args = ['git','rm', file]
+            self.runCommand('Git rm', ret, args)
         else:
             try:
-                _file = abspath(file) if not isabs(file) else file
-                os.remove(_file)
-                return (0, [], [], set([]))
+                os.remove(file)
             except Exception, ex:
-                return (1, [], reportException.report(ex), set([])) 
-            
-    def normalizePath(self, path):
-        '''
-        Converts path to a path relative to the local repository base
-        '''
-        return relpath(path, self._localrepo)
+                ret[0] = 1
+                ret[1].append(reportException.report(ex))
+                
+    def doGitStatus(self, ret): 
+        args = ['git', 'status']
