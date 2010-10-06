@@ -31,7 +31,7 @@ RM = 'Rm'
     
 
 class GitManager(threading.Thread):
-    def __init__(self, localrepo, response_queue):
+    def __init__(self, localrepo, shared_repo, response_queue, log=None):
         '''
         Constructor
         localrepo:       path to the directory that contains the local
@@ -43,6 +43,8 @@ class GitManager(threading.Thread):
         and the thread that performs the Git operations
         '''
         self._localrepo = localrepo
+        self._shared_repo = shared_repo
+        self._log = log
         self._response_queue = response_queue
         super(GitManager, self).__init__(None, None, 'GitManager')
         if self._localrepo is not None:
@@ -158,6 +160,8 @@ class GitManager(threading.Thread):
                 self.doGitCommit(data.ret, message)
                 if data.ret[0] != 0:
                     return
+                if not self._shared_repo:
+                    return # Not using a shared repository - bail out
                 self.doGitFetch(data.ret)
                 if data.ret[0] != 0:
                     return
