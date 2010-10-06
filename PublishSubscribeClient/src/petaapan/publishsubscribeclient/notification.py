@@ -52,6 +52,7 @@ class ServerManager(threading.Thread):
         self._port = port
         ServerManager.Log = log
         ServerManager.Response = response_queue
+        super(ServerManager, self).__init__(None, None, 'HTTPServer')
         self._server = server_class((host, port), handler_class)
         self._shutdown = False
     
