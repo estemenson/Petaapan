@@ -55,7 +55,11 @@ class GitManager(threading.Thread):
         '''
         if self._localrepo is not None:
             self._internalQueue.put((SHUTDOWN, (None)), True, 60)
-            return self._response_queue.get(True, 60)
+            try:
+                return self._response_queue.get(True, 60)
+            except Queue.Empty:
+                pass
+                
         
         
     def runCommand(self, cmd, ret, args):
@@ -168,7 +172,7 @@ class GitManager(threading.Thread):
 
         
         def internalShutdown(self, args):
-            data.doShutdown = True
+            data.do_shutdown = True
             self._response_queue.put((SHUTDOWN,
                                       [0, ['Asynchronous services shutdown'],
                                        [], set([])]))
@@ -224,9 +228,14 @@ class GitManager(threading.Thread):
                            MV: internalMv,
                            RM: internalRm}
         while not data.do_shutdown:
-            args = self._internalQueue.get(True)
-            if args[0] in data.dispatcher:
-                data.dispatcher[args[0]](self, args[1])
+            # Take a peek every 2 seconds to make
+            # sure we are not shutting down
+            try: 
+                args = self._internalQueue.get(True, 2)
+                if args[0] in data.dispatcher:
+                    data.dispatcher[args[0]](self, args[1])
+            except Queue.Empty:
+                pass
         return
             
     def doGitAdd(self, ret, files):
