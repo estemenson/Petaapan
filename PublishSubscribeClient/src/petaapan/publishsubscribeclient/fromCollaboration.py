@@ -23,7 +23,7 @@ import urllib
 import BaseHTTPServer
 import threading
 
-NOTIFICATION = 'Google Notification'
+FROM_COLLABORATION = 'From Collaboration Server'
 
 from petaapan.utilities import reportException
 
@@ -38,7 +38,7 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
                                 if self.server.log != None else None)
         # Pass the message up to those who know what to do with it
         if self.server.response is not None:
-            self.server.response.put((NOTIFICATION, msg), False)
+            self.server.response.put((FROM_COLLABORATION, msg), False)
     
 
 class ServerManager(threading.Thread):
