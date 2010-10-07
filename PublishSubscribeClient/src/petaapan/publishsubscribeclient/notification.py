@@ -34,38 +34,48 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
         try: # Send the HTTP response
             self.send_response(httplib.OK)
         except Exception, ex:
-            reportException(ex, ServerManager.Log.error
-                                if ServerManager.Log != None else None)
+            reportException(ex, self.server.log.error
+                                if self.server.log != None else None)
         # Pass the message up to those who know what to do with it
-        if ServerManager.Response is not None:
-            ServerManager.Response.put((NOTIFICATION, msg), False)
+        if self.server.response is not None:
+            self.server.response.put((NOTIFICATION, msg), False)
     
 
 class ServerManager(threading.Thread):
-    Log = None
-    Response = None
     
     def __init__(self, server_class=BaseHTTPServer.HTTPServer,
                  handler_class=Handler, host='localhost', port=8080,
                  response_queue=None, log=None):
         self._host = host
         self._port = port
-        ServerManager.Log = log
-        ServerManager.Response = response_queue
+        self._log = log
+        self._broken = False
+        self._response = response_queue
         super(ServerManager, self).__init__(None, None, 'HTTPServer')
         self._server = server_class((host, port), handler_class)
-        self._shutdown = False
     
     def run(self): 
-        while not self._shutdown:
-            self._server.handle_request()       
+        try:
+            self._server.serve_forever()
+        except:
+            self._broken = True       
         self._server = None
-        ServerManager.Log = None
-        ServerManager.Response = None
-
-    def getShutdown(self):
-        return self._shutdown
-    def setShutdown(self, value):
-        self._shutdown = value
-    shutdown = property(getShutdown, setShutdown)
+        self._log = None
+        self._response = None
+        
+    @property
+    def log(self):
+        return self._log
+    
+    @property
+    def response(self):
+        return self._response
+    
+    @property
+    def broken(self):
+        return self._broken
+    
+    @property
+    def server(self):
+        return self._server
         
