@@ -27,3 +27,4 @@ TEST_SUBSCRIBE = 2 # Testing subscription to a publisher
 TEST_UNSUBSCRIBE = 3 # Testing un-subscription from a 
 TEST_SUBSCRIBED = 'subscribed'
 TEST_UNSUBSCRIBED = 'unsubscribed'
+GITHUB_NOTIFICATION = 'Github Notification'

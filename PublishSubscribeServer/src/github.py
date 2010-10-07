@@ -37,6 +37,7 @@ class MainPage(webapp.RequestHandler):
             str1 = unicode(urllib.unquote_plus(self.request.body_file.getvalue()))
             if string.find(str1, 'payload=') >= 0:
                 msg = string.split(str1, 'payload=')[1]
+                newmsg = [GITHUB_NOTIFICATION, msg]
                 gitpush = simplejson.loads(msg)
                 self.response.set_status(httplib.ACCEPTED)
                 repo = gitpush['repository']

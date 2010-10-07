@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
-Test driver for the Git Save high level command
+Test driver for Git commands invoked via GitManager
+
 Created on 2010-09-29
 
 @author: jonathan
@@ -17,9 +18,11 @@ import unittest
 import subprocess
 import stat
 import Queue
+import logging
 from os import mkdir, chdir, getcwd,  walk, remove, rmdir, chmod
 from os.path import exists, join, abspath, isdir
-from petaapan.utilities.gitmanager import GitManager, SAVE, SHUTDOWN
+from petaapan.utilities.gitmanager import GitManager, SAVE, SHUTDOWN,\
+                                          GIT_RESPONSE
 
 TEST_RM_GIT = 'testRemoteGitRepo'
 TEST_LOC_GIT = 'testLocalGitRepo'
@@ -44,6 +47,9 @@ def rmtree(base):
             
 
 class Test(unittest.TestCase):
+    '''
+    This test is self-contained and can be run from within Eclipse
+    '''
 
     def createFile(self, path, lines=10):
         with open(path, 'w') as f:       
@@ -97,7 +103,7 @@ class Test(unittest.TestCase):
             for f in range(10):
                 self.createFile(join(d, 'File' + str(f)))
                 
-        # Checkin the content we just created and push to remote
+        # Check in the content we just created and push to remote
         args = ['git', 'add'] + list(dirs)
         subprocess.check_call(args)
         args = ['git', 'commit', '-m "Initial commit"' ]
@@ -108,22 +114,21 @@ class Test(unittest.TestCase):
         
         # Create the Git Manager that will be used for the tests
         self._queue = Queue.Queue(0)
-        self._manager = GitManager(join(path, TEST_LOC_GIT),
-                                   self._queue)
+        self._manager = GitManager(join(path, TEST_LOC_GIT), None,
+                                   self._queue, logging)
         self._manager.start()
         return   
 
 
     def tearDown(self):
         # Get rid of the test apparatus
-        self._queue.join() # Wait for queue to flush
-        self._manager.shutdown() # Wait until manager shuts down
-        ret = self._queue.get(True, 60)
-        self.assertTrue(ret.operation == SHUTDOWN)
-        if exists(TEST_RM_GIT):
-            rmtree(TEST_RM_GIT)
-        if exists(TEST_LOC_GIT):
-            rmtree(TEST_LOC_GIT)
+        try:
+            self._manager.shutdown() # Wait until manager shuts down
+        finally:
+            if exists(TEST_RM_GIT):
+                rmtree(TEST_RM_GIT)
+            if exists(TEST_LOC_GIT):
+                rmtree(TEST_LOC_GIT)
 
 
     def testSave1(self):
@@ -135,16 +140,17 @@ class Test(unittest.TestCase):
         self.createFile(f)
         self._manager.save([join(STORIES, 'Story1')], 'Test commit 1')
         ret = self._queue.get(True, 2400)
-        self.assertTrue(ret[0] == SAVE)
+        self.assertTrue(ret[0] == GIT_RESPONSE)
+        self.assertTrue(ret[1][0] == SAVE)
         print('Stdout:')
-        for l in ret[1][1]:
+        for l in ret[1][1][1]:
             print(l)
         print('Stderr:')
-        for l in ret[1][2]:
+        for l in ret[1][1][2]:
             print(l)
-        self.assertTrue(ret[1][0] == 0)
-        if len(ret[1][3]) != 0:
-            self.assertTrue(join(STORIES, 'Story1') in ret[1][3])
+        self.assertTrue(ret[1][1][0] == 0)
+        if len(ret[1][1][3]) != 0:
+            self.assertTrue(join(STORIES, 'Story1') in ret[1][1][3])
             
         # Add three files and modify an existing file
         # Let Git recognise the modified stuff implicitly
@@ -154,15 +160,19 @@ class Test(unittest.TestCase):
         self.createFile(join(TEST_LOC_GIT, SPRINTS, 'Sprint1'))
         self.modifyFile(join(TEST_LOC_GIT, STORIES, 'Story1'))
         self._manager.save(None, 'Test commit 2')
-        ret = self._queue.get(True, 2400)
-        self.assertTrue(ret[0] == SAVE)
-        print('Stdout:')
-        for l in ret[1][1]:
-            print(l)
-        print('Stderr:')
-        for l in ret[1][2]:
-            print(l)
-        self.assertTrue(ret[1][0] == 0)
+        try:
+            ret = self._queue.get(True, 10)
+            self.assertTrue(ret[0] == GIT_RESPONSE)
+            self.assertTrue(ret[1][0] == SAVE)
+            print('Stdout:')
+            for l in ret[1][1][1]:
+                print(l)
+            print('Stderr:')
+            for l in ret[1][1][2]:
+                print(l)
+            self.assertTrue(ret[1][1][0] == 0)
+        except Queue.Empty:
+            self.assertTrue(False)
 
 
 if __name__ == "__main__":

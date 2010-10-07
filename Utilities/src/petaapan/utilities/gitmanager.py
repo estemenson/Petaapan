@@ -22,12 +22,14 @@ import os
 
 from petaapan.utilities import reportException
 
+GIT_RESPONSE = 'Git response'
 GIT_SAVE = 'GitSave'
 SHUTDOWN = 'Shutdown'
 SAVE = 'Save'
 COMMIT = 'Commit'
 MV = 'Mv'
 RM = 'Rm'
+SHUTDOWN_TIMEOUT = 10
     
 
 class GitManager(threading.Thread):
@@ -49,6 +51,9 @@ class GitManager(threading.Thread):
         super(GitManager, self).__init__(None, None, 'GitManager')
         if self._localrepo is not None:
             self._internalQueue = Queue.Queue(0)
+            
+    def sendResponse(self, response):
+        self._response_queue.put((GIT_RESPONSE, response))
         
     def shutdown(self):
         '''
@@ -56,9 +61,9 @@ class GitManager(threading.Thread):
         Sends a shutdown message on the internal queue to the Git manager
         '''
         if self._localrepo is not None:
-            self._internalQueue.put((SHUTDOWN, (None)), True, 60)
+            self._internalQueue.put((SHUTDOWN, (None)), True, SHUTDOWN_TIMEOUT)
             try:
-                return self._response_queue.get(True, 60)
+                return self._response_queue.get(True, SHUTDOWN_TIMEOUT)
             except Queue.Empty:
                 pass
                 
@@ -171,15 +176,15 @@ class GitManager(threading.Thread):
                 self.doGitPush(data.ret)
                 return
             finally:
-                self._response_queue.put((SAVE, data.ret), False)
+                self.sendResponse((SAVE, data.ret))
                 data.ret = None
 
         
         def internalShutdown(self, args):
             data.do_shutdown = True
-            self._response_queue.put((SHUTDOWN,
-                                      [0, ['Asynchronous services shutdown'],
-                                       [], set([])]))
+            self.sendResponse((SHUTDOWN,
+                               [0, ['Asynchronous services shutdown'],
+                               [], set([])]))
             data.ret = None
             
         def internalCommit(self, args):
@@ -192,7 +197,7 @@ class GitManager(threading.Thread):
                 self.doGitCommit(data.ret, message)
                 return
             finally:
-                self._response_queue.put((COMMIT, data.ret), False)
+                self.sendResponse((COMMIT, data.ret))
                 data.ret = None
                 
         def internalMv(self, args):
@@ -207,7 +212,7 @@ class GitManager(threading.Thread):
                     return
                 self.doGitMv(data.ret, old, new)
             finally:
-                self._response_queue.put((MV, data.ret), False)
+                self.sendResponse((MV, data.ret))
                 data.ret = None
                 
         def internalRm(self, args):
@@ -221,7 +226,7 @@ class GitManager(threading.Thread):
                     return
                 self.doGitRm(data.ret, args)
             finally:
-                self._response_queue.put((RM, data.ret), False)
+                self.sendResponse((RM, data.ret))
                 data.ret = None
                 
             
@@ -316,3 +321,4 @@ class GitManager(threading.Thread):
                 
     def doGitStatus(self, ret): 
         args = ['git', 'status']
+        self.runCommand('Git status', ret, args)
