@@ -21,8 +21,7 @@ import Queue
 import logging
 from os import mkdir, chdir, getcwd,  walk, remove, rmdir, chmod
 from os.path import exists, join, abspath, isdir
-from petaapan.utilities.gitmanager import GitManager, SAVE, SHUTDOWN,\
-                                          GIT_RESPONSE
+from petaapan.utilities.gitmanager import GitManager, SAVE, GIT_RESPONSE
 
 TEST_RM_GIT = 'testRemoteGitRepo'
 TEST_LOC_GIT = 'testLocalGitRepo'
