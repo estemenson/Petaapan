@@ -23,8 +23,7 @@ SUBSCRIBER_PORT = 'subscriberPort' # Port where subscriber wishes to
                                    # receive notifications
 SUBSCRIBE = 1 # User is subscribing to a specified publisher
 UNSUBSCRIBE = 0 # User is un-subscribing from a specified publisher
-TEST_SUBSCRIBE = 2 # Testing subscription to a publisher
-TEST_UNSUBSCRIBE = 3 # Testing un-subscription from a publisher
+TESTING = 'Testing' # Tell server this is a test subscription
 TEST_SUBSCRIBED = 'subscribed'
 TEST_UNSUBSCRIBED = 'unsubscribed'
 GITHUB_NOTIFICATION = 'Github Notification'

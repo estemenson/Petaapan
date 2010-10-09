@@ -23,8 +23,8 @@ import string
 import logging
 
 from petaapan.utilities import reportException
-from pssDef import *
-from database import Subscriber, load_online_subscribers
+from petaapan.publishsubscribeserver.pssDef import *
+from petaapan.publishsubscribeserver.database import Subscriber, load_online_subscribers
 from cache import GacCache
 
     
@@ -41,16 +41,10 @@ class MainPage(webapp.RequestHandler):
                 self.response.set_status(httplib.PRECONDITION_FAILED,
                 'No or incomplete subscription status provided in request')
                 return
-            testing = False
             status = req[REQ_SUBSCRIPTION]
             publisher = req[REQ_PUBLISHER]
             port = req[REQ_PORT]
-            if status == TEST_SUBSCRIBE:
-                status = SUBSCRIBE
-                testing = True
-            elif status == TEST_UNSUBSCRIBE:
-                status = UNSUBSCRIBE
-                testing = True
+            testing = True if TESTING in req else False
             
             # Make sure this user is registered at Google and logged on
             guser = users.get_current_user()
