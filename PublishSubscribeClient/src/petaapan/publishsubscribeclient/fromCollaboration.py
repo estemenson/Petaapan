@@ -44,7 +44,7 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 class ServerManager(threading.Thread):
     
     def __init__(self, server_class=BaseHTTPServer.HTTPServer,
-                 handler_class=Handler, host='localhost', port=8080,
+                 handler_class=Handler, host='0.0.0.0', port=8080,
                  response_queue=None, log=None):
         self._host = host
         self._port = port
