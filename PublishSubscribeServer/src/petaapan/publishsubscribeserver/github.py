@@ -21,15 +21,25 @@ import httplib
 import string
 import urllib
 import logging
+logging.basicConfig(level=logging.DEBUG)
+doLog = {logging.CRITICAL: logging.critical,
+         logging.ERROR: logging.error,
+         logging.WARNING: logging.warning,
+         logging.INFO: logging.info,
+         logging.DEBUG: logging.debug}
 
 from petaapan.utilities import reportException
-from pssDef import *
-from githubDef import *
-from database import queue_pub_notifications
+from petaapan.publishsubscribeserver.pssDef import *
+from petaapan.publishsubscribeserver.githubDef import *
+from petaapan.publishsubscribeserver.database import queue_pub_notifications
 
 
 
 class MainPage(webapp.RequestHandler):
+        
+    def doReturn(self, level, status, msg):
+        doLog[level](msg)
+        self.response.set_status(status, msg)
     
     
     def post(self):
@@ -39,7 +49,7 @@ class MainPage(webapp.RequestHandler):
                 msg = string.split(str1, 'payload=')[1]
                 newmsg = [GITHUB_NOTIFICATION, msg]
                 gitpush = simplejson.loads(msg)
-                self.response.set_status(httplib.ACCEPTED)
+                self.response.set_status(httplib.OK)
                 repo = gitpush['repository']
                 url = repo['url']
                 publisher = GITHUB + '/' + string.split(url, 'http://github.com/')[1]
@@ -54,8 +64,8 @@ class MainPage(webapp.RequestHandler):
                 self.response.set_status(httplib.OK)
             return
         except Exception , ex:
-            self.response.set_status(httplib.UNPROCESSABLE_ENTITY,
-                                     reportException.report(ex, logging.error))
+            self.doReturn(logging.ERROR, httplib.UNPROCESSABLE_ENTITY,
+                           reportException.report(ex))
             return
 
 

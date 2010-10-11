@@ -53,7 +53,7 @@ class GitManager(threading.Thread):
             self._internalQueue = Queue.Queue(0)
             
     def sendResponse(self, response):
-        self._response_queue.put((GIT_RESPONSE, response))
+        self._response_queue.put((GIT_RESPONSE, response), False)
         
     def shutdown(self):
         '''
