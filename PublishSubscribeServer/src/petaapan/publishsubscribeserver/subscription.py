@@ -21,25 +21,36 @@ import httplib
 import urllib
 import string
 import logging
+logging.basicConfig(level=logging.DEBUG)
 
 from petaapan.utilities import reportException
 from petaapan.publishsubscribeserver.pssDef import *
 from petaapan.publishsubscribeserver.database import Subscriber, load_online_subscribers
-from cache import GacCache
+from petaapan.publishsubscribeserver.cache import GacCache
 
+doLog = {logging.CRITICAL: logging.critical,
+         logging.ERROR: logging.error,
+         logging.WARNING: logging.warning,
+         logging.INFO: logging.info,
+         logging.DEBUG: logging.debug}
     
     
 class MainPage(webapp.RequestHandler):
     
     def __init__(self):
         self.cache = GacCache()
+        
+    def doReturn(self, level, status, msg):
+        doLog[level](msg)
+        self.response.set_status(status, msg)
     
     def post(self):
         try:
-            req = simplejson.loads(urllib.unquote_plus(self.request.body_file.getvalue()))
+            req = simplejson.loads(urllib.unquote_plus(\
+                                            self.request.body_file.getvalue()))
             if REQ_SUBSCRIPTION not in req or REQ_PUBLISHER not in req:
-                self.response.set_status(httplib.PRECONDITION_FAILED,
-                'No or incomplete subscription status provided in request')
+                self.doReturn(logging.WARNING, httplib.PRECONDITION_FAILED,
+                    'No or incomplete subscription status provided in request')
                 return
             status = req[REQ_SUBSCRIPTION]
             publisher = req[REQ_PUBLISHER]
@@ -51,8 +62,9 @@ class MainPage(webapp.RequestHandler):
             if not guser:
                 guser = users.User(email=req[USER_ID])
                 if guser.user_id() == None and not testing:
-                    self.response.set_status(httplib.NOT_ACCEPTABLE,
-                             'Urecognized Google user')
+                    self.doReturn(logging.WARNING, httplib.NOT_ACCEPTABLE,
+                                  'Urecognized Google user')
+                    return
                         
                 
             
@@ -73,10 +85,11 @@ class MainPage(webapp.RequestHandler):
                 cuser = Subscriber(google_id=guser, status=status,
                                    user_ip=req[SUBSCRIBER_DNS], user_port=port,
                                    email_address=guser.email(),
-                                   publisher=publisher,
-                                   first_name=req[FIRST_NAME],
-                                   middle_name=req[MIDDLE_NAME],
-                                   last_name=req[LAST_NAME])
+                                   publisher=publisher
+#                                   first_name=req[FIRST_NAME],
+#                                   middle_name=req[MIDDLE_NAME],
+#                                   last_name=req[LAST_NAME]
+                                   )
                 self.cache.update(publisher, key, cuser)
             
             # If user is coming online update
@@ -93,19 +106,20 @@ class MainPage(webapp.RequestHandler):
                     cuser.status = UNSUBSCRIBE
                     self.cache.update(publisher, key, cuser)
             else:
-                self.response.set_status(httplib.NOT_ACCEPTABLE,
-                                         'Urecognized status notification')
+                self.doReturn(logging.WARNING, httplib.NOT_ACCEPTABLE,
+                              'Urecognized status notification')
                 return
             
             # Normal return
-            self.response.set_status(httplib.ACCEPTED,
-                                     'Status set to %s' % TEST_SUBSCRIBED
-                                     if status == SUBSCRIBE
-                                     else TEST_UNSUBSCRIBED )
+            self.doReturn(logging.DEBUG, httplib.ACCEPTED,
+                          'Status set to %s' % TEST_SUBSCRIBED
+                                               if status == SUBSCRIBE
+                                               else TEST_UNSUBSCRIBED )
+            return
             
         except Exception , ex:
-            self.response.set_status(httplib.UNPROCESSABLE_ENTITY,
-                                     reportException.report(ex, logging.error))
+            self.doReturn(logging.ERROR, httplib.UNPROCESSABLE_ENTITY,
+                          reportException.report(ex))
             return
             
         

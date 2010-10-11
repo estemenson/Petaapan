@@ -42,7 +42,7 @@ def send(msg, url, dest_host='0.0.0.0', dest_port=8080,
                         reportException.report(ex, logging.error), None)
             conn.request('POST', url, qp)
             ret = conn.getresponse()
-            return (ret.status, ret.reason, ret.getheaders())
+            return (ret.status, ret.reason, ret)
     except Exception, ex:
         reportException.report(ex, logger)
         return (httplib.FAILED_DEPENDENCY, None, None)

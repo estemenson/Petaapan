@@ -25,7 +25,7 @@ import logging
 
 from petaapan.utilities import reportException
 from githubDef import *
-from pssDef import *
+from petaapan.publishsubscribeserver.pssDef import *
 
 
 class GithubWorker(webapp.RequestHandler):
@@ -34,10 +34,13 @@ class GithubWorker(webapp.RequestHandler):
             gitpush = simplejson.loads(\
                         urllib.unquote_plus(self.request.body_file.getvalue()))
             subscriber = gitpush[SUBSCRIBER]
+            logging.debug('Sending Github notification to %s' % subscriber)
             result = urlfetch.fetch(url=subscriber,
                                     payload=self.request.body_file.getvalue(),
                                     method=urlfetch.POST)
-            
+            logging.debug(\
+                           'Github transmission to %s completed with code %i'\
+                           % (result.final_url, result.status_codes))
             return
         except Exception, ex:
             reportException.report(ex, logging.error)

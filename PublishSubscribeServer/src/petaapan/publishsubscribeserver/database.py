@@ -13,11 +13,15 @@ from __future__ import division
 from __future__ import absolute_import
 from __future__ import with_statement
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 from google.appengine.ext import db
 from google.appengine.api.labs import taskqueue
 from django.utils import simplejson
-from pssDef import *
-from githubDef import *
+
+from petaapan.publishsubscribeserver.pssDef import *
+from petaapan.publishsubscribeserver.githubDef import *
 
 import urllib
 
@@ -58,3 +62,5 @@ def queue_pub_notifications(publisher, payload):
                       queue_name=GITHUB,
                       payload=urllib.quote_plus(simplejson.dumps(parm),
                                                 str('/')))
+        logging.debug(\
+'Queued Github notification for transmission to %s' % subscriber.user_ip)
