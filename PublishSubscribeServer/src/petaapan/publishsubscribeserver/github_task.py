@@ -24,7 +24,7 @@ import urllib
 import logging
 
 from petaapan.utilities import reportException
-from githubDef import *
+from petaapan.publishsubscribeserver.githubDef import *
 from petaapan.publishsubscribeserver.pssDef import *
 
 
