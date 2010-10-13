@@ -73,6 +73,9 @@ class ToCollaboration(threading.Thread):
             msg, url, dest_port, log = args
             purl = urlparse.urlparse(url)
             host = purl[1]
+            scheme = purl[0]
+            if not scheme:
+                url = 'http://' + url
             ret = send(msg, url, host, dest_port, log)
             self._response_queue.put((TO_COLLABORATION, (SUBSCRIPTION_RESPONSE,
                                                          (ret[0], ret[1], ret))),

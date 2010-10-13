@@ -21,39 +21,55 @@ import json
 import httplib
 import urllib
 import BaseHTTPServer
+import SocketServer
 import threading
 
 FROM_COLLABORATION = 'From Collaboration Server'
 
 from petaapan.utilities import reportException
 
+
 class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
+    global Log
+    global Response
     
     def do_POST(self):
         msg = json.loads(urllib.unquote_plus(self.rfile.read()))
         try: # Send the HTTP response
             self.send_response(httplib.OK)
         except Exception, ex:
-            reportException(ex, self.server.log.error
-                                if self.server.log != None else None)
+            reportException(ex, self.server.log.error\
+                                  if self.server.log.error != None else None)
         # Pass the message up to those who know what to do with it
         if self.server.response is not None:
             self.server.response.put((FROM_COLLABORATION, msg), False)
+
+class HTTPReceptor(BaseHTTPServer.HTTPServer):
+    def __init__(self, log=None, response_queue=None, host='0.0.0.0',
+                 port=80808, handler_class=Handler):
+        self._log = log
+        self._response = response_queue
+        SocketServer.TCPServer.__init__(self, (host, port), handler_class)
+        
+    @property
+    def log(self):
+        return self._log    
     
+    @property
+    def response(self):
+        return self._response
 
 class ServerManager(threading.Thread):
     
-    def __init__(self, server_class=BaseHTTPServer.HTTPServer,
-                 handler_class=Handler, host='0.0.0.0', port=8080,
+    def __init__(self, handler_class=Handler, host='0.0.0.0', port=8080,
                  response_queue=None, log=None):
         self._host = host
         self._port = port
-        self._log = log
         self._broken = False
-        self._response = response_queue
         super(ServerManager, self).__init__(None, None,
                                             'From Collaboration HTTPServer')
-        self._server = server_class((host, port), handler_class)
+        self._server = HTTPReceptor(log, response_queue, host, port,
+                                    handler_class)
     
     def run(self): 
         try:
@@ -61,16 +77,6 @@ class ServerManager(threading.Thread):
         except:
             self._broken = True       
         self._server = None
-        self._log = None
-        self._response = None
-        
-    @property
-    def log(self):
-        return self._log
-    
-    @property
-    def response(self):
-        return self._response
     
     @property
     def broken(self):
