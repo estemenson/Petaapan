@@ -53,7 +53,7 @@ class MainPage(webapp.RequestHandler):
                 repo = gitpush['repository']
                 url = repo['url']
                 publisher = GITHUB + '/' + string.split(url, 'http://github.com/')[1]
-                queue_pub_notifications(publisher, gitpush)
+                queue_pub_notifications(publisher, newmsg)
             else:
                 # If we don't recognise the payload, send an accepted
                 # status anyway as this is likely from someone disruptive

@@ -41,37 +41,37 @@ class Test(unittest.TestCase):
                   REQ_PORT: TEST_PORT}
                   
         ret = sendJsonMsg.send(status, url)
-        self.assertEquals(ret[0] , httplib.ACCEPTED)
+        self.assertEquals(ret[0] , httplib.OK)
         self.assertTrue(string.find(ret[1], TEST_SUBSCRIBED) >= 0)
 
         # Try to unsubscribe
         status[REQ_SUBSCRIPTION] = TEST_UNSUBSCRIBE
         ret = sendJsonMsg.send(status, url)
-        self.assertEquals(ret[0], httplib.ACCEPTED)
+        self.assertEquals(ret[0], httplib.OK)
         self.assertTrue(string.find(ret[1], TEST_UNSUBSCRIBED) >= 0)
         
         # Try to subscribe again
         status[REQ_SUBSCRIPTION] = TEST_SUBSCRIBE
         ret = sendJsonMsg.send(status, url)
-        self.assertEquals(ret[0] , httplib.ACCEPTED)
+        self.assertEquals(ret[0] , httplib.OK)
         self.assertTrue(string.find(ret[1], TEST_SUBSCRIBED) >= 0)
         
         # Say we are subscribing when we are already
         status[REQ_SUBSCRIPTION] = TEST_SUBSCRIBE
         ret = sendJsonMsg.send(status, url)
-        self.assertEquals(ret[0] , httplib.ACCEPTED)
+        self.assertEquals(ret[0] , httplib.OK)
         self.assertTrue(string.find(ret[1], TEST_SUBSCRIBED) >= 0)
 
         # Now to go unsubscribe
         status[REQ_SUBSCRIPTION] = TEST_UNSUBSCRIBE
         ret = sendJsonMsg.send(status, url)
-        self.assertEquals(ret[0], httplib.ACCEPTED)
+        self.assertEquals(ret[0], httplib.OK)
         self.assertTrue(string.find(ret[1], TEST_UNSUBSCRIBED) >= 0)
 
         # And do it again
         status[REQ_SUBSCRIPTION] = TEST_UNSUBSCRIBE
         ret = sendJsonMsg.send(status, url)
-        self.assertEquals(ret[0], httplib.ACCEPTED)
+        self.assertEquals(ret[0], httplib.OK)
         self.assertTrue(string.find(ret[1], TEST_UNSUBSCRIBED) >= 0)
         
 

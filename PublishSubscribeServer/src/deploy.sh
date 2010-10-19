@@ -51,16 +51,13 @@ fi
 
 # Create the deployment tree
 mkdir -p ../deploy/petaapan/utilities
+mkdir -p ../deploy/petaapan/publishsubscribeserver
 if [[ $? != 0 ]]; then exit 1; fi
 mkdir -p ../deploy/static/images
 if [[ $? != 0 ]]; then exit 1; fi
 
 # Get the control files
 cp -dpu *.yaml ../deploy
-if [[ $? != 0 ]]; then exit 1; fi
-
-# Get the application python files
-cp -dpu *.py ../deploy
 if [[ $? != 0 ]]; then exit 1; fi
 
 # Get favicon.ico
@@ -71,9 +68,15 @@ if [[ $? != 0 ]]; then exit 1; fi
 cp -dpu petaapan/*.py ../deploy/petaapan
 if [[ $? != 0 ]]; then exit 1; fi
 cd petaapan/utilities
-cp -dpu __init__.py reportException.py sendJsonMsg.py ../../../deploy/petaapan/utilities
+cp -dpu __init__.py reportException.py sendJsonMsg.py\
+        ../../../deploy/petaapan/utilities
 if [[ $? != 0 ]]; then exit 1; fi
-cd ../..
+
+# Copy main server application files
+cd ../publishsubscribeserver
+cp -dpu *.py ../../../deploy/petaapan/publishsubscribeserver
+if [[ $? != 0 ]]; then exit 1; fi
+cd ../../..
 
 # Now we need to test the deployment to verify that it
 # is complete
@@ -81,33 +84,17 @@ cd ../..
 if [[ $Runtest == 1 ]]
 then
     python "$Gp/dev_appserver.py" --clear_datastore --address=0.0.0.0\
-           "$Root" &
+           "$Root/../deploy" &
     App_pid=$!
 
-    # Launch our HTTP server that listens for notifications from Google
+    # Launch the Agiman application
+    
+    cd ../../Agile/test/src
     sleep 5s
-    python tests/testNotification.py &
-    Notification_pid=$!
-
-    # Run the subscription process to subscribe to the collaborative session
-    python tests/launchSubscription.py http://poseidon:8080/ jgossage@gmail.com
-    ret=$?
-    if [[ $ret != 0 ]]
-    then
-        echo "Subscription process failed with error $ret"
-        kill $Notification_pid
-        kill $App_pid
-        exit 1
-    fi
-
-    # Tell user to make Github talk to us
-    if [[ $Upload == 1 ]]
-    then
-        read -p "Please tell Github to talk to us. When test is complete type 'y' if you still want to upload: "
-        if [[ ! ($Var -eq 'y' || $Var -eq 'Y' || $Var -eq 'yes') ]]; then Upload=0; fi
-    fi 
-    # Kill the test apps
-    kill $Notification_pid
+    echo "Loading Agiman application to test deployment"
+    python storyboot.py --collaburl="localhost/subscribe"\
+                        --responseurl="localhost" --testserver\
+                        --loglevel="info"
     kill $App_pid
 fi
 
@@ -115,7 +102,8 @@ fi
 # Upload the deployment to Google
 if [[ $Upload == 1 ]]
 then
-    python "$Gp/appcfg.py" --email=jgossage@gmail.com  update ../deploy/
+    echo "Pushing PublishSubscribeServer to Google"
+    python "$Gp/appcfg.py" --email=jgossage@gmail.com  update deploy/
     if [[ $? != 0 ]]; then exit 1; fi
 fi
 
