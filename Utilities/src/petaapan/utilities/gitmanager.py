@@ -19,6 +19,7 @@ import threading
 import Queue
 import string
 import os
+import os.path
 
 from petaapan.utilities import reportException
 
@@ -74,6 +75,7 @@ class GitManager(threading.Thread):
         _consoleStderr = []
         _commits = set([])
         _result = 0
+        self._log.debug('Running %s in %s' % (args, self._localrepo))
         p = subprocess.Popen(args, stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE,
                              cwd=self._localrepo)
@@ -256,7 +258,7 @@ class GitManager(threading.Thread):
             # User wants a specified list of objects saved
             if not isinstance(files, list):
                 files = [files]
-            args += files 
+            args += [os.path.relpath(f, self._localrepo) for f in files]
         self.runCommand('Git add', ret, args)
     
     def doGitCommit(self, ret, message):

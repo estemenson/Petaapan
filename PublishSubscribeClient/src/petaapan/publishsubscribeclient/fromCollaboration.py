@@ -23,30 +23,53 @@ import urllib
 import BaseHTTPServer
 import SocketServer
 import threading
+import time
 
 FROM_COLLABORATION = 'From Collaboration Server'
 
 from petaapan.utilities import reportException
+from petaapan.publishsubscribeserver.githubDef import GITHUB_ID
+from petaapan.publishsubscribeserver.pssDef import GITHUB_NOTIFICATION
 
 
 class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
-    global Log
-    global Response
+    
+    def handle_one_request(self):
+        self.server.log.debug('About to parse Github notification headers at %f'\
+                              % time.clock())
+        BaseHTTPServer.BaseHTTPRequestHandler.handle_one_request(self)
     
     def do_POST(self):
-        msg = json.loads(urllib.unquote_plus(self.rfile.read()))
+        self.server.log.debug('fromCollaboration received notification at %f'\
+                              % time.clock())
+        cl = int(self.headers.dict['content-length'])
+        msg = json.loads(urllib.unquote_plus(self.rfile.read(cl)))
         try: # Send the HTTP response
+            self.server.log.debug('fromCollaboration sending response at %f'\
+                                  % time.clock())
             self.send_response(httplib.OK)
+            self.send_header('content-length', '0')
+            self.end_headers()
+            self.wfile.write('\r\n')
         except Exception, ex:
-            reportException(ex, self.server.log.error\
-                                  if self.server.log.error != None else None)
+            log = self.server.log.error if self.server.log else None
+            log.debug('Acknowledge error in fromCollaboration %s' % str(ex))
+            reportException.report(ex, log)
         # Pass the message up to those who know what to do with it
         if self.server.response is not None:
-            self.server.response.put((FROM_COLLABORATION, msg), False)
+            if isinstance(msg, dict):
+                payload = msg.get(GITHUB_ID)
+                if payload and isinstance(payload, list)\
+                           and payload[0] == GITHUB_NOTIFICATION:
+                    self.server.response.put((FROM_COLLABORATION, payload),
+                                             False)
+                elif self.server.log:
+                    self.server.log.error('Invalid Github  notification: %s'\
+                                          % str(msg))
 
 class HTTPReceptor(BaseHTTPServer.HTTPServer):
     def __init__(self, log=None, response_queue=None, host='0.0.0.0',
-                 port=80808, handler_class=Handler):
+                 port=8080, handler_class=Handler):
         self._log = log
         self._response = response_queue
         SocketServer.TCPServer.__init__(self, (host, port), handler_class)

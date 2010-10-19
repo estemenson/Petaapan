@@ -61,10 +61,10 @@ class MainPage(webapp.RequestHandler):
             guser = users.get_current_user()
             if not guser:
                 guser = users.User(email=req[USER_ID])
-                if guser.user_id() == None and not testing:
-                    self.doReturn(logging.WARNING, httplib.NOT_ACCEPTABLE,
-                                  'Urecognized Google user')
-                    return
+#                if guser.user_id() == None and not testing:
+#                    self.doReturn(logging.WARNING, httplib.NOT_ACCEPTABLE,
+#                                  'Urecognized Google user %s' % req[USER_ID])
+#                    return
                         
                 
             
@@ -77,7 +77,7 @@ class MainPage(webapp.RequestHandler):
             # See if user in cache
             # If not add user to  cache
             uid = guser.user_id()
-            if testing and uid is None:
+            if uid is None:
                 uid = string.split(guser.email(),'@')[0]
             key = uid+req[SUBSCRIBER_DNS]+str(port)
             cuser = ul[key] if key in ul else None
@@ -111,7 +111,7 @@ class MainPage(webapp.RequestHandler):
                 return
             
             # Normal return
-            self.doReturn(logging.DEBUG, httplib.ACCEPTED,
+            self.doReturn(logging.DEBUG, httplib.OK,
                           'Status set to %s' % TEST_SUBSCRIBED
                                                if status == SUBSCRIBE
                                                else TEST_UNSUBSCRIBED )
