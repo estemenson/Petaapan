@@ -56,12 +56,11 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
             log.debug('Acknowledge error in fromCollaboration %s' % str(ex))
             reportException.report(ex, log)
         # Pass the message up to those who know what to do with it
-        if self.server.response is not None:
+        if msg:
             if isinstance(msg, dict):
                 payload = msg.get(GITHUB_ID)
-                if payload and isinstance(payload, list)\
-                           and payload[0] == GITHUB_NOTIFICATION:
-                    self.server.response.put((FROM_COLLABORATION, payload),
+                if payload and isinstance(payload, dict):
+                    self.server.response.put((FROM_COLLABORATION, (GITHUB_NOTIFICATION, payload)),
                                              False)
                 elif self.server.log:
                     self.server.log.error('Invalid Github  notification: %s'\
