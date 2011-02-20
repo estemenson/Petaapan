@@ -24,7 +24,12 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 from petaapan.utilities import reportException
-from petaapan.publishsubscribeserver.pssDef import *
+from petaapan.publishsubscribeserver.pssDef import REQ_PUBLISHER, USER_ID
+from petaapan.publishsubscribeserver.pssDef import SUBSCRIBER_DNS
+from petaapan.publishsubscribeserver.pssDef import REQ_SUBSCRIPTION, REQ_PORT
+from petaapan.publishsubscribeserver.pssDef import SUBSCRIBE, UNSUBSCRIBE
+from petaapan.publishsubscribeserver.pssDef import TEST_SUBSCRIBED, SUBACTION
+from petaapan.publishsubscribeserver.pssDef import TEST_UNSUBSCRIBED
 from petaapan.publishsubscribeserver.database import Subscriber, load_online_subscribers
 from petaapan.publishsubscribeserver.cache import GacCache
 
@@ -55,7 +60,6 @@ class MainPage(webapp.RequestHandler):
             status = req[REQ_SUBSCRIPTION]
             publisher = req[REQ_PUBLISHER]
             port = req[REQ_PORT]
-            testing = True if TESTING in req else False
             
             # Make sure this user is registered at Google and logged on
             guser = users.get_current_user()

@@ -25,8 +25,8 @@ import logging
 import time
 
 from petaapan.utilities import reportException
-from petaapan.publishsubscribeserver.githubDef import *
-from petaapan.publishsubscribeserver.pssDef import *
+from petaapan.publishsubscribeserver.githubDef import GITHUB_TASK_URL
+from petaapan.publishsubscribeserver.pssDef import SUBSCRIBER
 
 
 class GithubWorker(webapp.RequestHandler):

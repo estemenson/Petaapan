@@ -37,7 +37,6 @@ class EnvironmentPath(object):
                  dirsep = os.path.sep):
         # Build the path table
         self.pathTable = []
-        path = environment['Path'] + pathsep + environment['PATH']
         parstr = environment['Path'].partition(pathsep)
         while parstr[0] != '':
             # Sanitise the path

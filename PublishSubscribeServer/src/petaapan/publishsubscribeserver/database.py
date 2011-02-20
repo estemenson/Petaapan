@@ -20,7 +20,8 @@ from google.appengine.ext import db
 from google.appengine.api.labs import taskqueue
 from django.utils import simplejson
 
-from petaapan.publishsubscribeserver.pssDef import *
+from petaapan.publishsubscribeserver.pssDef import UNSUBSCRIBE, SUBSCRIBE
+from petaapan.publishsubscribeserver.pssDef import SUBSCRIBER
 from petaapan.publishsubscribeserver.githubDef import *
 
 import urllib

@@ -15,8 +15,11 @@ import unittest
 import httplib
 import string
 
-from pssDef import *
-from githubDef import *
+from petaapan.publishsubscribeserver.pssDef import SUBACTION, TEST_SUBSCRIBED
+from petaapan.publishsubscribeserver.pssDef import REQ_SUBSCRIPTION, REQ_PORT
+from petaapan.publishsubscribeserver.pssDef import REQ_PUBLISHER
+from petaapan.publishsubscribeserver.pssDef import TEST_UNSUBSCRIBED
+from petaapan.publishsubscribeserver.githubDef import GITHUB
 from petaapan.utilities import sendJsonMsg
 
 TEST_PORT = 16160
@@ -36,7 +39,7 @@ class Test(unittest.TestCase):
     def testSubscription(self):
         url = 'http://poseidon:8080/%s' % SUBACTION
         # Try to subscribe
-        status = {REQ_SUBSCRIPTION: TEST_SUBSCRIBE,
+        status = {REQ_SUBSCRIPTION: TEST_SUBSCRIBED,
                   REQ_PUBLISHER: GITHUB + '/jfgossage/Storyapp',
                   REQ_PORT: TEST_PORT}
                   
@@ -45,31 +48,31 @@ class Test(unittest.TestCase):
         self.assertTrue(string.find(ret[1], TEST_SUBSCRIBED) >= 0)
 
         # Try to unsubscribe
-        status[REQ_SUBSCRIPTION] = TEST_UNSUBSCRIBE
+        status[REQ_SUBSCRIPTION] = TEST_UNSUBSCRIBED
         ret = sendJsonMsg.send(status, url)
         self.assertEquals(ret[0], httplib.OK)
         self.assertTrue(string.find(ret[1], TEST_UNSUBSCRIBED) >= 0)
         
         # Try to subscribe again
-        status[REQ_SUBSCRIPTION] = TEST_SUBSCRIBE
+        status[REQ_SUBSCRIPTION] = TEST_SUBSCRIBED
         ret = sendJsonMsg.send(status, url)
         self.assertEquals(ret[0] , httplib.OK)
         self.assertTrue(string.find(ret[1], TEST_SUBSCRIBED) >= 0)
         
         # Say we are subscribing when we are already
-        status[REQ_SUBSCRIPTION] = TEST_SUBSCRIBE
+        status[REQ_SUBSCRIPTION] = TEST_SUBSCRIBED
         ret = sendJsonMsg.send(status, url)
         self.assertEquals(ret[0] , httplib.OK)
         self.assertTrue(string.find(ret[1], TEST_SUBSCRIBED) >= 0)
 
         # Now to go unsubscribe
-        status[REQ_SUBSCRIPTION] = TEST_UNSUBSCRIBE
+        status[REQ_SUBSCRIPTION] = TEST_UNSUBSCRIBED
         ret = sendJsonMsg.send(status, url)
         self.assertEquals(ret[0], httplib.OK)
         self.assertTrue(string.find(ret[1], TEST_UNSUBSCRIBED) >= 0)
 
         # And do it again
-        status[REQ_SUBSCRIPTION] = TEST_UNSUBSCRIBE
+        status[REQ_SUBSCRIPTION] = TEST_UNSUBSCRIBED
         ret = sendJsonMsg.send(status, url)
         self.assertEquals(ret[0], httplib.OK)
         self.assertTrue(string.find(ret[1], TEST_UNSUBSCRIBED) >= 0)

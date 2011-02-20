@@ -15,10 +15,8 @@ from __future__ import unicode_literals
 import unittest
 import httplib
 
-if __name__ != "__main__":
-    import petaapan.utilities.sendJsonMsg
-    from pssDef import *
-    from githubDef import *
+import petaapan.utilities.sendJsonMsg
+from petaapan.publishsubscribeserver.githubDef import GITHUB
 
 class GithubTest(unittest.TestCase):
        
@@ -87,9 +85,6 @@ if __name__ == "__main__":
     import sys
     import os
     sys.path.insert(0, os.getcwd())
-    import petaapan.utilities.sendJsonMsg
-    from pssDef import *
-    from githubDef import *
 
     ret = unittest.main()
     exit(ret)

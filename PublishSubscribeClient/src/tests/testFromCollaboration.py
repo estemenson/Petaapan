@@ -18,8 +18,7 @@ import Queue
 logging.basicConfig(level=logging.DEBUG)
 logging.info('About to run test notification')
 
-if __name__ != "__main__":
-    from petaapan.publishsubscribeclient import fromCollaboration
+from petaapan.publishsubscribeclient import fromCollaboration
 
 
 class Test(unittest.TestCase):
@@ -89,6 +88,5 @@ if __name__ == "__main__":
     import sys
     import os
     sys.path.insert(0, os.getcwd())
-    from petaapan.publishsubscribeclient import fromCollaboration
     
     unittest.main()

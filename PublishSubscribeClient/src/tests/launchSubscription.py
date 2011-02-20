@@ -11,13 +11,14 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import httplib
-import string
-
-if __name__ != '__main__':
-    from pssDef import *
-    from githubDef import *
-    from petaapan.utilities import sendJsonMsg
+from petaapan.publishsubscribeserver.pssDef import REQ_SUBSCRIPTION
+from petaapan.publishsubscribeserver.pssDef import TEST_SUBSCRIBED, REQ_PORT
+from petaapan.publishsubscribeserver.pssDef import REQ_PUBLISHER, USER_ID
+from petaapan.publishsubscribeserver.pssDef import SUBSCRIBER_DNS, SUBACTION
+from petaapan.publishsubscribeserver.pssDef import SUBSCRIBER_PORT, FIRST_NAME
+from petaapan.publishsubscribeserver.pssDef import MIDDLE_NAME, LAST_NAME
+from petaapan.publishsubscribeserver.githubDef import GITHUB
+from petaapan.utilities import sendJsonMsg
 
 TEST_PORT = 16160
 
@@ -34,7 +35,7 @@ def main():
     lastName = sys.argv[9] if ln > 9 else 'Gossage'
     url = '%s%s' % (url, SUBACTION)
     # Try to subscribe
-    status = {REQ_SUBSCRIPTION: TEST_SUBSCRIBE,
+    status = {REQ_SUBSCRIPTION: TEST_SUBSCRIBED,
               REQ_PUBLISHER: GITHUB + '/jfgossage/Storyapp',
               REQ_PORT: TEST_PORT,
               USER_ID: id,
@@ -61,9 +62,6 @@ if __name__ == '__main__':
     import sys
     import os
     sys.path.insert(0, os.getcwd())
-    from pssDef import *
-    from githubDef import *
-    from petaapan.utilities import sendJsonMsg
 
     ret = main()
     exit(ret)

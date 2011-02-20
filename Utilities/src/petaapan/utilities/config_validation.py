@@ -17,8 +17,6 @@ from os.path import isdir, isfile, exists
 from urllib2 import urlopen, URLError
 import logging
 
-import petaapan.utilities.argparse
-
 def ValidateUrl(url):
     result = logging.NOTSET
     c = None

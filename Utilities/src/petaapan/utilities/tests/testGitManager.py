@@ -52,12 +52,12 @@ class Test(unittest.TestCase):
 
     def createFile(self, path, lines=10):
         with open(path, 'w') as f:       
-            for l in range(lines):
+            for _ in range(lines):
                 f.write(('*' * 50) + '\n')
                 
     def modifyFile(self, path, line=5):
         with open(path, 'r+') as f:
-            for l in range(line):
+            for _ in range(line):
                 f.readline()
             f.write(('+' * 50) + '\n')
             pass

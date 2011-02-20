@@ -18,7 +18,6 @@ import subprocess
 import threading
 import Queue
 import string
-import os
 import os.path
 
 from petaapan.utilities import reportException

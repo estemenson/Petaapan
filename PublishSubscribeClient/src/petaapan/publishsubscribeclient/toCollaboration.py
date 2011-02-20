@@ -16,7 +16,10 @@ import logging
 import Queue
 import urlparse
 
-from petaapan.publishsubscribeserver.pssDef import *
+from petaapan.publishsubscribeserver.pssDef import SUBSCRIBE, UNSUBSCRIBE
+from petaapan.publishsubscribeserver.pssDef import SUBSCRIBER_DNS, REQ_PORT
+from petaapan.publishsubscribeserver.pssDef import REQ_PUBLISHER, USER_ID
+from petaapan.publishsubscribeserver.pssDef import REQ_SUBSCRIPTION, TESTING
 from petaapan.utilities.sendJsonMsg import send
 
 SUBSCRIPTION_RESPONSE = 'Subscription Response'

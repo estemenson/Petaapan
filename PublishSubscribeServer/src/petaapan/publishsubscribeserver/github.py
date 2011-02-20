@@ -29,8 +29,7 @@ doLog = {logging.CRITICAL: logging.critical,
          logging.DEBUG: logging.debug}
 
 from petaapan.utilities import reportException
-from petaapan.publishsubscribeserver.pssDef import *
-from petaapan.publishsubscribeserver.githubDef import *
+from petaapan.publishsubscribeserver.githubDef import GITHUB
 from petaapan.publishsubscribeserver.database import queue_pub_notifications
 
 

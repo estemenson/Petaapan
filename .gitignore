@@ -3,3 +3,4 @@ Storyapp/
 *.pyc
 /.metadata*/
 *.settings/
+/wiki/
