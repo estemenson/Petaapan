@@ -11,14 +11,14 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from petaapan.publishsubscribeserver.pssDef import REQ_SUBSCRIPTION
-from petaapan.publishsubscribeserver.pssDef import TEST_SUBSCRIBED, REQ_PORT
-from petaapan.publishsubscribeserver.pssDef import REQ_PUBLISHER, USER_ID
-from petaapan.publishsubscribeserver.pssDef import SUBSCRIBER_DNS, SUBACTION
-from petaapan.publishsubscribeserver.pssDef import SUBSCRIBER_PORT, FIRST_NAME
-from petaapan.publishsubscribeserver.pssDef import MIDDLE_NAME, LAST_NAME
-from petaapan.publishsubscribeserver.githubDef import GITHUB
-from petaapan.utilities import sendJsonMsg
+from publishsubscribeserver.pssDef import REQ_SUBSCRIPTION
+from publishsubscribeserver.pssDef import TEST_SUBSCRIBED, REQ_PORT
+from publishsubscribeserver.pssDef import REQ_PUBLISHER, USER_ID
+from publishsubscribeserver.pssDef import SUBSCRIBER_DNS, SUBACTION
+from publishsubscribeserver.pssDef import SUBSCRIBER_PORT, FIRST_NAME
+from publishsubscribeserver.pssDef import MIDDLE_NAME, LAST_NAME
+from publishsubscribeserver.githubDef import GITHUB
+from petaapan_utilities import sendJsonMsg
 
 TEST_PORT = 16160
 

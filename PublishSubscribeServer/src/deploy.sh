@@ -1,14 +1,17 @@
 #!/bin/bash
 # Script to prepare Publish/Subscribe server for deployment to Google
 # and optionally do the deployment
-# The script will run in the root directory of the
+# The script will run in the src directory of the
 # PublishSubscribe Eclipse project
 #
-# Usage: deploy [-c] [-t] [-u] root
+# Usage: deploy [-c] [-t] [-u] [root]
 # Options:  -c   Clear the deployment directory before starting
 #           -t   Run tests from deployment directory
 #           -u   Do the upload to Google
-#           root Is the deployment directory
+#           root Is the parent directory of the deployment directory
+#                It defaults to the CWD which should be the src
+#                directory of the Petaapan PublishSubscribeServer
+#                Eclipse project
 
 # Parse the command line arguments
 Clear=0
@@ -64,16 +67,19 @@ if [[ $? != 0 ]]; then exit 1; fi
 cp -pu ../../Administration/home/WebContent/favicon.ico ../deploy/static/images
 if [[ $? != 0 ]]; then exit 1; fi
 
-# Copy utility python files
-cp -dpu petaapan/*.py ../deploy/petaapan
+cd ../../Utilities/src/petaapan
 if [[ $? != 0 ]]; then exit 1; fi
-cd petaapan/utilities
-cp -dpu __init__.py reportException.py sendJsonMsg.py\
-        ../../../deploy/petaapan/utilities
+cp -dpu __init__.py ../../../PublishSubscribeServer/deploy/petaapan
+if [[ $? != 0 ]]; then exit 1; fi
+cd utilities
+if [[ $? != 0 ]]; then exit 1; fi
+cp -dpu __init__.py reportException.py sendJsonMsg.py console_logger.py\
+        ../../../../PublishSubscribeServer/deploy/petaapan/utilities
 if [[ $? != 0 ]]; then exit 1; fi
 
 # Copy main server application files
-cd ../publishsubscribeserver
+cd ../../../../PublishSubscribeServer/src/petaapan/publishsubscribeserver
+if [[ $? != 0 ]]; then exit 1; fi
 cp -dpu *.py ../../../deploy/petaapan/publishsubscribeserver
 if [[ $? != 0 ]]; then exit 1; fi
 cd ../../..
@@ -89,9 +95,12 @@ then
 
     # Launch the Agiman application
     
-    cd ../../Agile/test/src
+    cd ../../CMAP/CMAP/src
     sleep 5s
     echo "Loading Agiman application to test deployment"
+    export PYTHONPATH="D:\\Users\\jonathan\\EclipseWorkspaces\\Repositories\\Petaapan\\Utilities\\src\\petaapan\\utilities"
+    echo "PYTHONPATH is - $PYTHONPATH"
+    ls $PYTHONPATH
     python storyboot.py --collaburl="localhost/subscribe"\
                         --responseurl="localhost" --testserver\
                         --loglevel="info"

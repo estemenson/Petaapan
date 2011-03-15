@@ -12,8 +12,7 @@ from __future__ import with_statement
 import unittest
 import logging
 import string
-import petaapan.utilities.reportException
-import petaapan.utilities.tests.stringHandler
+from petaapan.utilities import reportException, tests
 
 
 class TestError(Exception):
@@ -24,7 +23,7 @@ class TestReportError(unittest.TestCase):
     def setUp(self):
         self.logger = logging.getLogger('TestReportErrorLogger')
         self.logger.setLevel(logging.DEBUG)
-        self.handler = petaapan.utilities.tests.stringHandler.StringHandler()
+        self.handler = tests.stringHandler.StringHandler()
         self.logger.addHandler(self.handler)
         
 
@@ -37,7 +36,7 @@ class TestReportError(unittest.TestCase):
             raise TestError((error_code, error_description,
                              supplemental_arg1, supplemental_arg2 ))
         except TestError , ex:
-            st = petaapan.utilities.reportException.report(ex, self.logger)
+            st = reportException.report(ex, self.logger)
             found = 0
             
             # Make sure all the exception data is present

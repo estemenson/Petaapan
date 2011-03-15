@@ -24,13 +24,11 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 from petaapan.utilities import reportException
-from petaapan.publishsubscribeserver.pssDef import REQ_PUBLISHER, USER_ID
-from petaapan.publishsubscribeserver.pssDef import SUBSCRIBER_DNS
-from petaapan.publishsubscribeserver.pssDef import REQ_SUBSCRIPTION, REQ_PORT
-from petaapan.publishsubscribeserver.pssDef import SUBSCRIBE, UNSUBSCRIBE
-from petaapan.publishsubscribeserver.pssDef import TEST_SUBSCRIBED, SUBACTION
-from petaapan.publishsubscribeserver.pssDef import TEST_UNSUBSCRIBED
-from petaapan.publishsubscribeserver.database import Subscriber, load_online_subscribers
+from petaapan.publishsubscribeserver.pssDef import REQ_PUBLISHER, USER_ID,\
+    SUBSCRIBER_DNS, REQ_SUBSCRIPTION, REQ_PORT, SUBSCRIBE, UNSUBSCRIBE,\
+    TEST_SUBSCRIBED, SUBACTION, TEST_UNSUBSCRIBED
+from petaapan.publishsubscribeserver.database import Subscriber,\
+                                                     load_online_subscribers
 from petaapan.publishsubscribeserver.cache import GacCache
 
 doLog = {logging.CRITICAL: logging.critical,

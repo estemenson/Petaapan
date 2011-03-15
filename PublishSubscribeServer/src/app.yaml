@@ -5,14 +5,14 @@ api_version: 1
 
 handlers:
 - url: /subscribe
-  script: petaapan/publishsubscribeserver/subscription.py
+  script: publishsubscribeserver/subscription.py
 #  login: required
 
 - url: /github
-  script: petaapan/publishsubscribeserver/github.py
+  script: publishsubscribeserver/github.py
   
 - url: /tasks/github
-  script: petaapan/publishsubscribeserver/github_task.py
+  script: publishsubscribeserver/github_task.py
   login: admin
   
 - url: /admin/.*
@@ -25,10 +25,10 @@ handlers:
   upload: static/images/favicon.ico
   
 - url: /
-  script: petaapan/publishsubscribeserver/not_accepted.py
+  script: publishsubscribeserver/not_accepted.py
 
 - url: /.*
-  script: petaapan/publishsubscribeserver/not_accepted.py
+  script: publishsubscribeserver/not_accepted.py
   
 derived_file_type:
 - python_precompiled

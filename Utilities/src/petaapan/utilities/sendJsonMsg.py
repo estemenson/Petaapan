@@ -22,7 +22,7 @@ from petaapan.utilities import reportException
 def send(msg, url, dest_host='0.0.0.0', dest_port=80,
          logger=logging.warning):
     host = dest_host if dest_host is not None else '0.0.0.0'
-    port = 80
+    port = dest_port if dest_port is not None else '8080'
     try:
         conn = httplib.HTTPConnection(host, port)
         if conn is not None:

@@ -18,7 +18,7 @@ import Queue
 logging.basicConfig(level=logging.DEBUG)
 logging.info('About to run test notification')
 
-from petaapan.publishsubscribeclient import fromCollaboration
+from publishsubscribeclient import fromCollaboration
 
 
 class Test(unittest.TestCase):

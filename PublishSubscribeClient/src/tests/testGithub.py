@@ -15,8 +15,8 @@ from __future__ import unicode_literals
 import unittest
 import httplib
 
-import petaapan.utilities.sendJsonMsg
-from petaapan.publishsubscribeserver.githubDef import GITHUB
+from petaapan_utilities import sendJsonMsg
+from publishsubscribeserver.githubDef import GITHUB
 
 class GithubTest(unittest.TestCase):
        
@@ -74,8 +74,7 @@ class GithubTest(unittest.TestCase):
                    }
         url =  'http://agimanserver.appspot.com/%s' % GITHUB
         host = 'agimanserver.appspot.com'
-        status, reason = petaapan.utilities.sendJsonMsg.send(self.pushobj, url,
-                                                             host, 80)
+        status, reason = sendJsonMsg.send(self.pushobj, url, host, 80)
         self.assertTrue(status == httplib.ACCEPTED)
         print('github test return code: %s  reason: %s',
               status, reason)
