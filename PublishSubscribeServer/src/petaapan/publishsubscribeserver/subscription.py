@@ -57,6 +57,10 @@ class MainPage(webapp.RequestHandler):
                 return
             status = req[REQ_SUBSCRIPTION]
             publisher = req[REQ_PUBLISHER]
+            if publisher == None or publisher == '':
+                self.doReturn(logging.WARNING, httplib.PRECONDITION_FAILED,
+                              'No publisher supplied')
+                return
             port = req[REQ_PORT]
             
             # Make sure this user is registered at Google and logged on
