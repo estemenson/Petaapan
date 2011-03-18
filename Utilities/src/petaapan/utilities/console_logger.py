@@ -25,16 +25,22 @@ class ConsoleLogger(object):
     def __init__(self, name, level=logging.ERROR):
         self._log = None
         self._enabled = False
+        self._handler = None
         try:
             self._formatter = logging.Formatter(\
                      '%(name)s %(asctime)s %(levelname)-8s %(message)s')
             self._log = logging.getLogger(name)
             self._log.setLevel(level)
             self._log.propogate = False
+            self._handler = logging.StreamHandler()
+            self._handler.setLevel(level)
+            self._handler.setFormatter(self._formatter)
+            self._log.addHandler(self._handler)
             self.enable()
             def close_logging():
                 if self._log and self._handler:
-                    logging.shutdown([self._handler])
+                    logging.shutdown()
+#                    logging.shutdown([self._handler])
             atexit.register(close_logging)
         except Exception:
             pass
