@@ -69,7 +69,8 @@ if [[ $? != 0 ]]; then exit 1; fi
 
 cd ../../Utilities/src/petaapan
 if [[ $? != 0 ]]; then exit 1; fi
-cp -dpu __init__.py ../../../PublishSubscribeServer/deploy/petaapan
+#cp -dpu __init__.py ../../../PublishSubscribeServer/deploy/petaapan
+echo "" >../../../PublishSubscribeServer/deploy/petaapan/__init__.py
 if [[ $? != 0 ]]; then exit 1; fi
 cd utilities
 if [[ $? != 0 ]]; then exit 1; fi
@@ -98,11 +99,12 @@ then
     cd ../../CMAP/CMAP/src
     sleep 5s
     echo "Loading Agiman application to test deployment"
-    export PYTHONPATH="D:\\Users\\jonathan\\EclipseWorkspaces\\Repositories\\Petaapan\\Utilities\\src\\petaapan\\utilities"
-    echo "PYTHONPATH is - $PYTHONPATH"
-    ls $PYTHONPATH
+    export PYTHONPATH="\
+D:\\Users\\jonathan\\EclipseWorkspaces\\Repositories\\Petaapan\\Utilities\\src;\
+D:\\Users\\Jonathan\\EclipseWorkspaces\\Repositories\\pymt"
     python storyboot.py --collaburl="localhost/subscribe"\
-                        --responseurl="localhost" --testserver\
+                        --repopath="D:\\Users\\jonathan\\EclipseWorkspaces\\Repositories\\CMAP-Data" \
+                        --responseurl="localhost" --testserver \
                         --loglevel="info"
     kill $App_pid
 fi
