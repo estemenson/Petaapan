@@ -50,7 +50,8 @@ class MainPage(webapp.RequestHandler):
                 self.response.set_status(httplib.OK)
                 repo = gitpush['repository']
                 url = repo['url']
-                publisher = GITHUB + '/' + string.split(url, 'http://github.com/')[1]
+                publisher = GITHUB + '/'\
+                            + string.split(url, 'https://github.com/')[1]
                 queue_pub_notifications(publisher, gitpush)
             else:
                 # If we don't recognise the payload, send an accepted
