@@ -105,7 +105,7 @@ D:\\Users\\Jonathan\\EclipseWorkspaces\\Repositories\\pymt"
     python storyboot.py --collaburl="localhost/subscribe"\
                         --repopath="D:\\Users\\jonathan\\EclipseWorkspaces\\Repositories\\CMAP-Data" \
                         --responseurl="localhost" --testserver \
-                        --loglevel="info"
+                        --loglevel="info" --gitsub="github/estemenson/CMAP-Data"
     kill $App_pid
 fi
 
